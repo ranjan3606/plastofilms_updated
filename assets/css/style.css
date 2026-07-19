@@ -233,9 +233,9 @@ ul {
 }
 
 .hero-title {
-    font-size: 4.5rem;
+    font-size: 5.5rem;
     font-weight: 800;
-    color: #ffffff;
+    color: #CD1D24;
     margin-bottom: 1.5rem;
     line-height: 1.1;
     text-transform: uppercase;
@@ -386,7 +386,7 @@ ul {
 ========================================== */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 2rem;
 }
 
@@ -409,9 +409,9 @@ ul {
     left: 0;
     width: 100%;
     height: 4px;
-    background: var(--color-secondary);
+    background: linear-gradient(to right, var(--color-accent) 50%, var(--color-secondary) 50%);
     transform: scaleX(0);
-    transform-origin: left;
+    transform-origin: center;
     transition: transform var(--transition-normal);
     z-index: -1;
 }
@@ -430,6 +430,11 @@ ul {
     font-size: 2.5rem;
     color: var(--color-secondary);
     margin-bottom: 1.5rem;
+    transition: color var(--transition-normal);
+}
+
+.card:hover .card-icon {
+    color: var(--color-accent);
 }
 
 .card-title {
@@ -755,5 +760,69 @@ ul {
     
     .about-home-content {
         padding: 2.5rem 1.5rem;
+    }
+}
+
+/* ==========================================
+   BUSINESS CARDS FLIP SECTION
+========================================== */
+.business-cards-section {
+    padding: 2rem 0 6rem 0;
+    text-align: center;
+}
+.business-cards-grid {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.flip-card {
+    background-color: transparent;
+    width: 450px;
+    height: 260px;
+    perspective: 1000px;
+}
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #fff;
+}
+.flip-card-front img, .flip-card-back img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+@media (max-width: 500px) {
+    .flip-card {
+        width: 100%;
+        max-width: 350px;
+        height: 200px;
     }
 }

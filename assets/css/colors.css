@@ -1,8 +1,8 @@
 :root {
     /* Brand Colors */
     --color-primary: #0f172a; /* Dark slate for header to make white logo visible */
-    --color-secondary: #0284c7; /* Brand Blue accent */
-    --color-accent: #0ea5e9;
+    --color-secondary: #0072BD; /* Brand Blue */
+    --color-accent: #CD1D24; /* Brand Red */
     
     /* Backgrounds */
     --bg-main: #ffffff;
