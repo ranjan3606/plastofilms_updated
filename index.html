@@ -34,19 +34,45 @@
     </header>
 
     <main>
-        <section class="hero" style="background-color: #ffffff; min-height: auto; padding: 10rem 0 10rem 0;">
-            <div class="container" style="max-width: 1200px;">
-                <div class="hero-content" style="max-width: 100%; text-align: center;">
-                    <h1 class="hero-title animated-logo" style="font-family: Arial, Helvetica, sans-serif; font-size: 8rem; font-weight: 900; margin-bottom: 0; line-height: 1.1; letter-spacing: -3px;"><span style="color: #ff0000;">Plasto</span> <span style="color: #0066cc;">Films</span></h1>
-                    <p class="hero-cert" style="font-family: Georgia, 'Times New Roman', Times, serif; color: #666666; text-shadow: none; font-size: 1.8rem; font-weight: normal; margin-top: 0; margin-bottom: 0.5rem;">An ISO 9001:2015 & ISO 22000:2018 Company</p>
-                    <div class="hero-subtitle" style="font-family: Georgia, 'Times New Roman', Times, serif; color: #000000; text-shadow: none; margin-bottom: 0; max-width: 100%; font-weight: bold;">
-                        <span style="font-size: 1.5rem;">Manufacturers of :</span><br>
-                        <span style="font-size: 1.4rem;">Zipper Slider Bags , Shrink Films, 100% Biodegradable , Anti Microbial, VCI Bags<br>
-                        Industrial packaging material and all kinds of other flexible packaging materials</span>
+        <section class="hero-scroll-container" style="height: 150vh; position: relative;">
+            <div style="position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden;">
+                <!-- Background Video -->
+                <video autoplay loop muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+                    <source src="assets/images/download.webm" type="video/webm">
+                </video>
+                
+                <!-- Text layer that fades in exactly as you scroll -->
+                <div id="hero-text-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none;">
+                    <div class="container" style="max-width: 1200px; text-align: center;">
+                        <h1 class="hero-title animated-logo" style="font-family: Arial, Helvetica, sans-serif; font-size: 8rem; font-weight: 900; margin-bottom: 0; line-height: 1.1; letter-spacing: -3px;"><span style="color: #ff0000;">Plasto</span> <span style="color: #0066cc;">Films</span></h1>
+                        <p class="hero-cert" style="font-family: Georgia, 'Times New Roman', Times, serif; color: #666666; text-shadow: none; font-size: 1.8rem; font-weight: normal; margin-top: 0; margin-bottom: 0.5rem;">An ISO 9001:2015 & ISO 22000:2018 Company</p>
+                        <div class="hero-subtitle" style="font-family: Georgia, 'Times New Roman', Times, serif; color: #000000; text-shadow: none; margin-bottom: 0; max-width: 100%; font-weight: bold;">
+                            <span style="font-size: 1.5rem;">Manufacturers of :</span><br>
+                            <span style="font-size: 1.4rem;">Zipper Slider Bags , Shrink Films, 100% Biodegradable , Anti Microbial, VCI Bags<br>
+                            Industrial packaging material and all kinds of other flexible packaging materials</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <script>
+            function updateHeroScroll() {
+                const textLayer = document.getElementById('hero-text-layer');
+                if (!textLayer) return;
+                const scrollY = window.scrollY;
+                // Fade in starts immediately and is fully visible after 400px of scrolling
+                let opacity = scrollY / 400;
+                if (opacity > 1) opacity = 1;
+                if (opacity < 0) opacity = 0;
+                
+                textLayer.style.opacity = opacity;
+                textLayer.style.pointerEvents = opacity > 0.5 ? 'auto' : 'none';
+            }
+            window.addEventListener('scroll', updateHeroScroll);
+            window.addEventListener('DOMContentLoaded', updateHeroScroll);
+            updateHeroScroll();
+        </script>
 
         <section class="section about-home">
             <div class="container">
