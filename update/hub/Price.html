@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plasto Cost Engine 3.1 - Professional</title>
+
+<script>
+  const CONFIG = {
+     sheetUrl: "https://script.google.com/macros/s/AKfycbyVjnznKK-sFyE4I-Tu6N7J3NwjoryFMDynXV75_i34oGXIB_JWPNVl0QLfANUzYVVJ/exec"
+  };
+</script>
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { 
+    font-family: 'Inter', sans-serif; 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .input-pro {
+    transition: all 0.2s;
+    font-size: 0.875rem; 
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    border: 2px solid #e2e8f0;
+    width: 100%;
+    color: #334155;
+    font-weight: 500;
+  }
+  .input-pro:focus { 
+    outline: none; 
+    border-color: #0ea5e9; 
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); 
+  }
+  
+  .label-pro {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+  }
+
+  .section-divider {
+    position: relative;
+    text-align: center;
+    margin: 1.75rem 0;
+  }
+  .section-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  }
+  .section-divider span {
+    position: relative;
+    background: white;
+    padding: 0 1rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .plasto-color { color: #E74C3C; }
+  .films-color { color: #3498DB; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+
+  .btn-calculate {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    transition: all 0.3s ease;
+    color: #ffffff;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(14,165,233,0.35);
+    width: 100%;
+    cursor: pointer;
+  }
+  
+  .btn-secondary { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .btn-edit { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+
+  body.pdf-export-mode {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  body.pdf-export-mode .lg\:col-span-7,
+  body.pdf-export-mode .no-print,
+  body.pdf-export-mode .no-print-section { 
+      display: none !important; 
+  }
+  
+  body.pdf-export-mode .lg\:col-span-5 {
+      width: 100% !important;
+      margin: 0 !important;
+  }
+
+  body.pdf-export-mode #quoteCard {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .breakdown-table { 
+    width: 100%; 
+    font-size: 0.8rem; 
+    border-collapse: collapse; 
+  }
+  .breakdown-table th { 
+    background: #f8fafc; 
+    padding: 0.6rem 0.75rem; 
+    text-align: left; 
+    font-weight: 700; 
+    border-bottom: 2px solid #e2e8f0; 
+  }
+  .breakdown-table td { 
+    padding: 0.55rem 0.75rem; 
+    border-bottom: 1px solid #f1f5f9; 
+  }
+  .breakdown-table tr:hover td { background: #f8fafc; }
+
+  .custom-row-header {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  /* Utility Calculators */
+  .util-calc-panel {
+    background: rgba(255,255,255,0.98);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  
+  .calc-button {
+    background: #0ea5e9;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .calc-button:hover {
+    background: #0284c7;
+    transform: translateY(-1px);
+  }
+  
+  .calc-display {
+    background: #1e293b;
+    color: #34d399;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-family: 'Courier New', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: right;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Pearl debug panel */
+  .pearl-debug {
+    background: linear-gradient(135deg, #fdf4ff, #f0e6ff);
+    border: 2px solid #c084fc;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.7rem;
+    color: #6b21a8;
+  }
+  .pearl-debug span { font-family: 'Courier New', monospace; font-weight: 800; }
+</style>
+</head>
+<body class="p-2 md:p-6 pb-32">
+
+<!-- Hidden Import -->
+<input type="file" id="importFile" accept=".json" class="hidden" onchange="handleFileSelect(event)">
+
+<!-- TOP NAV -->
+<nav class="max-w-7xl mx-auto mb-6 no-print">
+  <div class="glass-card rounded-2xl shadow-2xl p-4">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-4">
+        <img src="https://price.plastofilms.com/images/logo.png" alt="Logo" class="h-14 rounded-lg shadow-lg border-2 border-white">
+        <div>
+          <h1 class="text-2xl font-black text-gray-900">
+            Plasto Cost Engine 
+            <span class="text-sm font-bold gradient-text">v3.1</span>
+          </h1>
+          <p class="text-xs text-slate-600 font-semibold uppercase">Professional Quote Calculator</p>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center flex-wrap">
+        <button onclick="showAnalyticsModal()" class="px-4 py-1.5 bg-slate-700 hover:bg-slate-800 text-white font-bold rounded-lg text-xs flex items-center gap-1.5">
+          <i data-lucide="bar-chart-3" class="w-3 h-3"></i> Analytics
+        </button>
+        <button onclick="showUtilityCalc()" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs flex items-center gap-1.5">
+          <i data-lucide="calculator" class="w-3 h-3"></i> Utilities
+        </button>
+        <div class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+          <span class="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Ready
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div id="mainContainer" class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+  <!-- LEFT: CALCULATOR -->
+  <div class="lg:col-span-7 space-y-5 no-print">
+    
+    <div class="glass-card rounded-2xl shadow-2xl border overflow-hidden">
+      <!-- Toolbar -->
+      <div class="bg-gradient-to-r from-brand-500 to-purple-600 p-4 flex flex-wrap gap-3 justify-between items-center">
+         <div class="flex gap-2">
+            <button onclick="triggerImport()" class="text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg flex items-center gap-2">
+              <i data-lucide="folder-open" class="w-3 h-3"></i> Load
+            </button>
+            <button onclick="loadSampleData()" class="text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg flex items-center gap-2">
+              <i data-lucide="wand-2" class="w-3 h-3"></i> Demo
+            </button>
+            <button onclick="clearCalculator()" class="text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg flex items-center gap-2">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset
+            </button>
+         </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Meta Row -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div>
+            <label class="label-pro">Reference</label>
+            <input id="refNumber" type="text" class="input-pro" placeholder="QT-1001" oninput="syncRef()">
+          </div>
+          <div>
+            <label class="label-pro">Date</label>
+            <input id="calcDate" type="date" class="input-pro" oninput="syncDate()">
+          </div>
+          <div>
+             <label class="label-pro">Initials</label>
+             <input id="creatorInitials" type="text" class="input-pro uppercase" placeholder="ABC" oninput="syncRef()" maxlength="4">
+          </div>
+          <div class="col-span-2">
+            <label class="label-pro">MOQ</label>
+            <div class="relative">
+              <input id="moq" type="number" class="input-pro pr-16" placeholder="Qty" oninput="calculate()">
+              <select id="moqUnit" onchange="calculate()" class="absolute right-1 top-1 bottom-1 w-14 bg-slate-100 border-none rounded text-xs font-bold text-slate-600 text-center">
+                <option value="pcs">Pcs</option>
+                <option value="kg">Kg</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Material Selection -->
+        <div class="section-divider"><span>🧪 Material Selection</span></div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="label-pro">Material Type</label>
+            <select id="materialType" onchange="updateMaterialDensity(); calculate()" class="input-pro">
+              <option value="ldpe">LDPE (Low Density)</option>
+              <option value="lldpe">LLDPE (Linear Low Density)</option>
+              <option value="hdpe">HDPE (High Density)</option>
+              <option value="pp">PP (Polypropylene)</option>
+              <option value="bopp">BOPP (Cast)</option>
+              <option value="bopp_pearl">BOPP + Pearl Insert</option>
+              <option value="custom">Custom Density</option>
+            </select>
+          </div>
+          <div>
+            <label class="label-pro">Density (g/cm³)</label>
+            <input id="materialDensity" type="number" step="0.001" class="input-pro" value="0.923" oninput="calculate()" readonly>
+          </div>
+        </div>
+
+        <!-- Pearl Insert Section — FIXED FORMULA v3.1r -->
+        <div id="pearlInsertSection" class="hidden bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 p-5 space-y-4">
+          <h4 class="text-xs font-black text-purple-800 uppercase flex items-center gap-2">
+            <i data-lucide="gem" class="w-4 h-4"></i> Pearl Insert Configuration
+            <span class="ml-auto text-[9px] bg-purple-200 text-purple-700 px-2 py-0.5 rounded-full">Single Sheet</span>
+          </h4>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <label class="label-pro text-purple-700">Pearl Unit</label>
+              <select id="pearlUnit" onchange="togglePearlDims(); calculate()" class="input-pro border-purple-300">
+                <option value="mm">MM</option>
+                <option value="inch">Inch</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-pro text-purple-700">Pearl ₹/Kg</label>
+              <input id="pearlSheetPrice" type="number" class="input-pro border-purple-300" placeholder="e.g. 163" oninput="calculate()">
+            </div>
+            <div>
+              <label class="label-pro text-purple-700">Pearl Thick (Mic)</label>
+              <input id="pearlThickness" type="number" step="0.1" class="input-pro border-purple-300" value="32" oninput="calculate()">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label-pro text-purple-700"><span id="lblPearlLen">Pearl Length (mm)</span></label>
+              <input id="pearlLength" type="number" step="0.1" class="input-pro border-purple-300" placeholder="e.g. 515" oninput="calculate()">
+            </div>
+            <div>
+              <label class="label-pro text-purple-700"><span id="lblPearlWid">Pearl Width (mm)</span></label>
+              <input id="pearlWidth" type="number" step="0.1" class="input-pro border-purple-300" placeholder="e.g. 202" oninput="calculate()">
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 text-xs font-bold text-purple-700">
+              <input type="checkbox" id="pearlUsePouch" onchange="togglePearlDims()" class="rounded border-purple-300">
+              Use Pouch Dimensions
+            </label>
+            <div class="flex-1">
+              <label class="label-pro text-purple-700">Pearl Density (g/cm³)</label>
+              <input id="pearlDensity" type="number" step="0.001" class="input-pro border-purple-300" value="0.950" oninput="calculate()">
+            </div>
+          </div>
+
+          <!-- Pearl Debug / Results panel -->
+          <div class="pearl-debug grid grid-cols-2 gap-x-4 gap-y-1">
+            <div>Volume (cm³): <span id="dispPearlVol">0.000</span></div>
+            <div>Pearl Wt/Pc: <span id="dispPearlWt">0.000 g</span></div>
+            <div>Pearl ₹/Pc: <span id="dispPearlCost">₹0.0000</span></div>
+            <div>Formula: L×W×T×ρ (cm units)</div>
+          </div>
+        </div>
+
+        <!-- Specs -->
+        <div class="section-divider"><span>📐 Specifications</span></div>
+        
+        <div class="grid grid-cols-12 gap-4">
+           <div class="col-span-12 md:col-span-8">
+             <label class="label-pro">Item Description</label>
+             <input id="itemDesc" type="text" class="input-pro" placeholder="e.g. Printed LDPE Shopping Bag">
+           </div>
+           <div class="col-span-12 md:col-span-4">
+              <label class="label-pro">Dimension Unit</label>
+              <div class="flex rounded-lg overflow-hidden">
+                <button type="button" onclick="setUnit('inch')" id="btnInch" class="w-1/2 px-3 py-2.5 text-xs font-bold border-2 border-brand-600 bg-brand-600 text-white">INCH</button>
+                <button type="button" onclick="setUnit('mm')" id="btnMm" class="w-1/2 px-3 py-2.5 text-xs font-bold border-2 border-gray-300 bg-white text-gray-700">MM</button>
+              </div>
+              <input type="hidden" id="currentUnit" value="inch">
+           </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100">
+           <div>
+              <label class="label-pro text-brand-700" id="lblLen">Length</label>
+              <input id="length" type="number" step="0.01" class="input-pro border-brand-300" placeholder="0.00" oninput="autoCut(); calculate()">
+           </div>
+           <div>
+              <label class="label-pro text-brand-700" id="lblWid">Width</label>
+              <input id="width" type="number" step="0.01" class="input-pro border-brand-300" placeholder="0.00" oninput="autoCut(); calculate()">
+           </div>
+           <div>
+              <label class="label-pro flex justify-between">
+                <span>Thickness</span>
+                <select id="thickUnit" class="text-[9px] bg-transparent font-bold text-slate-600" onchange="calculate()">
+                  <option value="gauge">GAUGE</option>
+                  <option value="micron">MICRON</option>
+                </select>
+              </label>
+              <input id="thickness" type="number" step="0.1" class="input-pro border-brand-300" placeholder="0" oninput="syncMask(); calculate()">
+           </div>
+           <div>
+              <label class="label-pro text-purple-600">Display Thick.</label>
+              <input id="maskThickness" type="text" class="input-pro border-purple-200 bg-white" placeholder="On Quote">
+           </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+               <label class="label-pro">Sealing Logic</label>
+               <select id="sealing" onchange="autoCut(); calculate()" class="input-pro">
+                 <option value="bottom">Bottom Seal (Cut = Length)</option>
+                 <option value="side">Side Seal (Cut = Width)</option>
+               </select>
+            </div>
+            <div>
+               <label class="label-pro" id="lblCut">Cut Length (Auto)</label>
+               <input id="cut" type="number" step="0.01" class="input-pro bg-slate-50" readonly>
+            </div>
+        </div>
+
+        <!-- Costing -->
+        <div class="section-divider"><span>💰 Costing Components</span></div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <!-- Material -->
+           <div class="space-y-4">
+              <h4 class="text-xs font-black text-slate-900 uppercase flex items-center gap-2 pb-2 border-b-2 border-brand-200">
+                <i data-lucide="package" class="w-4 h-4 text-brand-600"></i> Material & Print
+              </h4>
+              
+              <div class="grid grid-cols-3 gap-3">
+                 <div>
+                    <label class="label-pro">RM Rate</label>
+                    <input id="rmRate" type="number" class="input-pro" placeholder="₹/kg" oninput="calculate()">
+                 </div>
+                 <div>
+                    <label class="label-pro">Wst %</label>
+                    <input id="wastage" type="number" class="input-pro" placeholder="%" value="0" oninput="calculate()">
+                 </div>
+                 <div>
+                    <label class="label-pro">Margin %</label>
+                    <input id="margin" type="number" class="input-pro" placeholder="%" value="0" oninput="calculate()">
+                 </div>
+              </div>
+
+              <div class="p-4 bg-slate-50 rounded-xl border-2 border-slate-100 space-y-3">
+                 <div>
+                    <label class="label-pro">Print Mode</label>
+                    <select id="printMode" class="input-pro text-xs" onchange="calculate()">
+                       <option value="color_1000">Per Color / 1000 Pcs</option>
+                       <option value="per_kg">Per Kg Rate</option>
+                       <option value="fixed">Fixed Rate / Pc</option>
+                    </select>
+                 </div>
+                 <div class="grid grid-cols-2 gap-3">
+                    <div>
+                       <label class="label-pro">Colors</label>
+                       <input id="colors" type="number" class="input-pro" placeholder="Qty" oninput="calculate()">
+                    </div>
+                    <div>
+                       <label class="label-pro">Rate</label>
+                       <input id="printRate" type="number" class="input-pro" placeholder="Cost" oninput="calculate()">
+                    </div>
+                 </div>
+                 <div class="grid grid-cols-2 gap-3">
+                   <div>
+                      <label class="label-pro">Freight/Kg</label>
+                      <input id="freight" type="number" class="input-pro" placeholder="₹" oninput="calculate()">
+                   </div>
+                   <div>
+                      <label class="label-pro">Setup (Total)</label>
+                      <input id="setup" type="number" class="input-pro" placeholder="₹" oninput="calculate()">
+                   </div>
+                 </div>
+              </div>
+           </div>
+
+           <!-- Extras -->
+           <div class="space-y-4">
+              <h4 class="text-xs font-black text-slate-900 uppercase flex items-center gap-2 pb-2 border-b-2 border-brand-200">
+                <i data-lucide="wrench" class="w-4 h-4 text-brand-600"></i> Processing Extras
+              </h4>
+              <div class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border-2 border-slate-100">
+                 <div>
+                   <label class="label-pro">Zip (₹/in)</label>
+                   <input id="zipCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Glue (₹/in)</label>
+                   <input id="glueCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Pocket (₹/in)</label>
+                   <input id="pktCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Handle (₹/pc)</label>
+                   <input id="hdlCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Slider (₹/pc)</label>
+                   <input id="sliderCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Pack (₹/pc)</label>
+                   <input id="packCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Punch (Qty)</label>
+                   <input id="punchCost" type="number" step="0.01" class="input-pro" oninput="calculate()">
+                 </div>
+              </div>
+              
+              <div>
+                 <label class="flex items-center gap-2 text-xs font-bold text-slate-600 cursor-pointer">
+                   <input type="checkbox" id="enableAddons" onchange="toggleAddons()" class="rounded border-gray-300">
+                   Enable Weight Addons
+                 </label>
+                 <div id="addonSection" class="hidden mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200 space-y-2">
+                    <div class="grid grid-cols-2 gap-3">
+                         <div>
+                           <label class="label-pro text-purple-700">Additives %</label>
+                           <input id="additivePerc" type="number" step="0.1" placeholder="Fill/MB" class="input-pro border-purple-200" oninput="calculate()">
+                        </div>
+                        <div>
+                           <label class="label-pro text-purple-700">Zip (g/m)</label>
+                           <input id="zipGm" type="number" step="0.1" placeholder="g/mtr" class="input-pro border-purple-200" oninput="calculate()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                           <label class="label-pro text-purple-700">Zip Wt (g)</label>
+                           <input id="wZip" type="number" step="0.1" placeholder="Manual" class="input-pro border-purple-200" oninput="calculate()">
+                        </div>
+                        <div>
+                           <label class="label-pro text-purple-700">Slider Wt (g)</label>
+                           <input id="wSlider" type="number" step="0.1" placeholder="Manual" class="input-pro border-purple-200" oninput="calculate()">
+                        </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="pt-4 border-t-2 border-dashed border-slate-200 space-y-3">
+          <button onclick="runCalculate()" class="btn-calculate">
+            <i data-lucide="calculator" class="w-5 h-5"></i>
+            Calculate Price
+          </button>
+          <div class="flex gap-3">
+            <button id="addBtn" onclick="addToQuote()" class="flex-1 btn-primary text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-xl">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Item to Quote
+            </button>
+            <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-24 bg-slate-200 text-slate-600 font-bold py-4 rounded-xl flex items-center justify-center">
+                Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="glass-card rounded-2xl shadow-2xl border p-6">
+        <h3 class="text-sm font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+            <i data-lucide="eye" class="w-4 h-4 text-brand-600"></i> Live Preview
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200 p-4">
+             <div class="text-2xl font-black text-emerald-600" id="dispPrice">₹0.00</div>
+             <div class="text-[10px] uppercase text-emerald-700 font-bold mt-1">Unit Price</div>
+           </div>
+           <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-4">
+             <div class="text-2xl font-black text-blue-600" id="dispRm">₹0.00</div>
+             <div class="text-[10px] uppercase text-blue-700 font-bold mt-1">Material Cost</div>
+           </div>
+           <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 p-4">
+             <div class="text-xl font-black text-purple-600" id="dispWt">0.000</div>
+             <div class="text-[10px] uppercase text-purple-700 font-bold mt-1">Weight (g)</div>
+           </div>
+           <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 p-4">
+             <div class="text-xl font-black text-amber-600" id="dispYield">0.00</div>
+             <div class="text-[10px] uppercase text-amber-700 font-bold mt-1">Yield (pcs/kg)</div>
+           </div>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-4">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl border-2 border-slate-600 p-4">
+                <div class="text-2xl font-black text-white text-center" id="dispBatch">-</div>
+                <div class="text-[10px] font-bold text-amber-400 uppercase text-center mt-1">Batch Weight</div>
+            </div>
+             <div class="bg-white rounded-xl border-2 border-slate-200 p-4 flex flex-col justify-center items-center">
+                <div class="text-xl font-black text-slate-700 text-center" id="dispBaseYield">0.00</div>
+                <div class="text-[10px] font-bold text-slate-500 uppercase text-center mt-1">Base Yield</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="glass-card rounded-2xl shadow-2xl border p-6">
+        <h3 class="text-sm font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-brand-600"></i> Cost Breakdown
+        </h3>
+        <div class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b border-slate-200">
+                <span class="text-slate-600 font-semibold">Material Cost</span>
+                <span class="font-mono font-bold text-slate-800" id="bkMat">₹0.00</span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-slate-200">
+                <span class="text-slate-600 font-semibold">Processing</span>
+                <span class="font-mono font-bold text-slate-800" id="bkProc">₹0.00</span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-slate-200">
+                <span class="text-slate-600 font-semibold">Printing</span>
+                <span class="font-mono font-bold text-slate-800" id="bkPrint">₹0.00</span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-slate-200">
+                <span class="text-slate-600 font-semibold">Freight</span>
+                <span class="font-mono font-bold text-slate-800" id="bkFreight">₹0.00</span>
+            </div>
+             <div class="flex justify-between py-2 border-b-2 border-emerald-200">
+                <span class="text-emerald-700 font-bold">Margin</span>
+                <span class="font-mono font-black text-emerald-600" id="bkMargin">₹0.00</span>
+            </div>
+        </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: QUOTE -->
+  <div class="lg:col-span-5 space-y-5">
+    <div id="quoteCard" class="glass-card rounded-2xl shadow-2xl border min-h-[600px] flex flex-col">
+       
+       <!-- Header -->
+       <div class="p-8 pb-4 border-b-2 border-slate-200">
+         <div class="flex justify-between items-start">
+             <div class="flex gap-4">
+                 <img id="quoteLogo" src="https://price.plastofilms.com/images/logo.png" class="h-16 w-auto shadow-lg rounded-lg" alt="Logo" crossorigin="anonymous">
+                 <div>
+                    <h2 class="text-2xl font-black"><span class="plasto-color">PLASTO</span> <span class="films-color">FILMS</span></h2>
+                    <div class="mt-2 text-[10px] text-slate-600 font-medium space-y-0.5">
+                       <p>124,120 DSIDC Complex, Okhla Ph-1, New Delhi</p>
+                       <p>GST: 07AAMFP1187B1ZB </p>
+                    </div>
+                 </div>
+             </div>
+             <div class="text-right">
+                <div class="text-lg font-black text-slate-700 uppercase">Quotation</div>
+                <div class="flex flex-col items-end gap-1 mt-2">
+                    <div class="text-xs text-slate-600 font-semibold">Ref: <span id="docRef" class="font-bold text-brand-600">#DRAFT</span></div>
+                    <div class="text-xs text-slate-600 font-semibold">Date: <span id="docDate">-</span></div>
+                    <div class="text-xs text-slate-500 italic" id="docInitials"></div>
+                </div>
+             </div>
+         </div>
+         
+         <div class="mt-4">
+               <button onclick="document.getElementById('customerSection').classList.toggle('hidden')" class="text-xs font-bold text-brand-600 hover:text-brand-800 no-print mb-2">
+                 <i data-lucide="user-plus" class="w-3 h-3 inline mr-1"></i> Client Details
+               </button>
+               <div id="customerSection" class="hidden bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border-2 border-slate-200 mb-2">
+                  <p class="text-[10px] font-black text-slate-500 uppercase mb-2">Bill To</p>
+                  <input class="w-full bg-transparent border-none p-0 text-sm font-bold text-slate-800 focus:ring-0 placeholder-slate-400" placeholder="Client Name" id="clientName">
+                  <input class="w-full bg-transparent border-none p-0 text-xs text-slate-600 focus:ring-0 placeholder-slate-400 mt-1" placeholder="Address / GSTIN" id="clientDetails">
+               </div>
+         </div>
+       </div>
+
+       <!-- Display Options -->
+       <div class="px-4 py-3 border-b-2 border-slate-200 bg-slate-50 no-print-section">
+            <div class="text-[9px] text-slate-500 mb-2 font-black">⚙️ DISPLAY OPTIONS</div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-2 text-[10px] uppercase font-bold text-slate-600">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showFinancials" onchange="renderQuote()" checked class="rounded border-gray-300"> Financials
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showSpecs" onchange="renderQuote()" class="rounded border-gray-300"> Specs
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showThickness" onchange="renderQuote()" checked class="rounded border-gray-300"> Thickness
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showBatchWeight" onchange="renderQuote()" class="rounded border-gray-300"> Batch Wt
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showTotalPcs" onchange="renderQuote()" class="rounded border-gray-300"> Total Pcs
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showPerPcPrice" onchange="renderQuote()" class="rounded border-gray-300"> Rate/Pc
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showPerKgPrice" onchange="renderQuote()" class="rounded border-gray-300"> Rate/Kg
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showMaterial" onchange="renderQuote()" class="rounded border-gray-300"> Material
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showPieceWt" onchange="renderQuote()" class="rounded border-gray-300"> Pc Wt
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" id="showCostBreakup" onchange="renderQuote()" class="rounded border-gray-300"> Full Breakup
+              </label>
+            </div>
+       </div>
+
+       <!-- Custom Row Actions -->
+       <div class="px-4 py-3 border-b-2 border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 no-print-section">
+            <div class="text-[9px] text-purple-600 mb-2 font-black">✨ CUSTOM ROWS</div>
+            <div class="flex gap-2">
+              <button onclick="addCustomHeader()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-2">
+                <i data-lucide="heading" class="w-3 h-3"></i> Header
+              </button>
+              <button onclick="addCustomRow()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-2">
+                <i data-lucide="file-plus" class="w-3 h-3"></i> Custom Row
+              </button>
+            </div>
+       </div>
+
+       <!-- Table -->
+       <div class="flex-1 overflow-x-auto p-4">
+         <table class="w-full text-left border-collapse" id="quoteTable">
+             <thead class="text-[10px] uppercase text-slate-600 font-black border-b-2 border-slate-300">
+             </thead>
+             <tbody class="text-xs text-slate-700 divide-y divide-slate-100">
+             </tbody>
+         </table>
+         <div id="emptyState" class="text-center py-16 text-slate-400 italic text-sm">
+           <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+           <p>No items in quote yet</p>
+         </div>
+       </div>
+
+       <!-- Footer -->
+       <div class="p-6 border-t-2 border-slate-200 bg-white mt-auto">
+         <div id="footerFinancials" class="flex justify-end mb-4">
+             <div class="text-right w-48 bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 p-4 rounded-xl">
+                <div class="text-[10px] font-black text-emerald-700 uppercase">Grand Total</div>
+                <div class="text-3xl font-black text-emerald-600" id="grandTotal">₹0.00</div>
+             </div>
+         </div>
+         
+         <div id="notesContainer" class="space-y-3">
+             <div class="text-[10px] font-black text-slate-700 uppercase mb-2">Terms & Conditions</div>
+             <textarea id="quoteNotes" class="w-full text-[10px] p-3 border-2 border-slate-200 rounded-lg resize-none focus:border-brand-500 focus:ring-0 bg-transparent font-medium" rows="10">Payment: 100% Advance & Balance Prior to dispatch
+
+Note:
+Final Quantity may vary by +/- 10%
+Delivery by 10-15 Days from receipt of advance.
+Freight and GST Extra.
+
+Banking Details
+Account Name: M/s- PLASTO FILMS
+Bank: UNION BANK OF INDIA
+A/C NO: 502205010929107
+IFSC Code: UBIN0550221</textarea>
+         </div>
+         
+         <div class="text-right mt-6">
+             <div class="text-sm font-bold mb-6">For <span class="plasto-color">PLASTO</span> <span class="films-color">FILMS</span></div>
+             <div class="h-px bg-slate-400 w-32 ml-auto mb-1"></div>
+             <p class="text-[8px] text-slate-500 uppercase font-bold">Auth. Signatory</p>
+         </div>
+       </div>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="no-print space-y-3">
+       <button onclick="handleExport()" id="pdfBtn" class="w-full btn-primary text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-2xl">
+         <i data-lucide="file-down" class="w-5 h-5"></i> Download PDF
+       </button>
+       
+       <button onclick="saveProjectFile()" class="w-full bg-slate-700 text-white font-bold py-4 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-3 shadow-2xl">
+         <i data-lucide="save" class="w-5 h-5"></i> Save Project
+       </button>
+       
+       <button onclick="clearQuote()" class="w-full bg-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-200 flex items-center justify-center gap-3 border border-red-200">
+         <i data-lucide="trash" class="w-5 h-5"></i> Clear Quote
+       </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Analytics Modal -->
+<div id="analyticsModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+  <div class="glass-card rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+    <div class="sticky top-0 bg-white border-b-2 border-slate-200 p-5 flex items-center justify-between">
+      <h2 class="text-xl font-black gradient-text">Cost Analytics & Breakdown</h2>
+      <button onclick="document.getElementById('analyticsModal').classList.add('hidden')" class="p-2 hover:bg-slate-100 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5 text-slate-600"></i>
+      </button>
+    </div>
+    <div id="analyticsContent" class="p-6"></div>
+  </div>
+</div>
+
+<!-- Utility Calculator Modal -->
+<div id="utilityModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+  <div class="glass-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+    <div class="sticky top-0 bg-white border-b-2 border-slate-200 p-5 flex items-center justify-between">
+      <h2 class="text-xl font-black gradient-text">Utility Calculators</h2>
+      <button onclick="document.getElementById('utilityModal').classList.add('hidden')" class="p-2 hover:bg-slate-100 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5 text-slate-600"></i>
+      </button>
+    </div>
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Unit Converter -->
+      <div class="util-calc-panel">
+        <h3 class="text-sm font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="w-4 h-4 text-purple-600"></i> Unit Converter
+        </h3>
+        <div class="space-y-3">
+          <div>
+            <label class="label-pro">Value</label>
+            <input id="unitValue" type="number" class="input-pro" placeholder="Enter value" step="0.01">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label-pro">From</label>
+              <select id="unitFrom" class="input-pro text-xs">
+                <option value="inch">Inch</option>
+                <option value="mm">MM</option>
+                <option value="cm">CM</option>
+                <option value="meter">Meter</option>
+                <option value="gauge">Gauge</option>
+                <option value="micron">Micron</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-pro">To</label>
+              <select id="unitTo" class="input-pro text-xs">
+                <option value="mm">MM</option>
+                <option value="inch">Inch</option>
+                <option value="cm">CM</option>
+                <option value="meter">Meter</option>
+                <option value="gauge">Gauge</option>
+                <option value="micron">Micron</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="convertUnits()" class="calc-button w-full">
+            <i data-lucide="zap" class="w-4 h-4 inline mr-2"></i> Convert
+          </button>
+          <div class="calc-display" id="unitResult">0.00</div>
+        </div>
+      </div>
+
+      <!-- Basic Calculator -->
+      <div class="util-calc-panel">
+        <h3 class="text-sm font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+          <i data-lucide="calculator" class="w-4 h-4 text-blue-600"></i> Basic Calculator
+        </h3>
+        <div class="calc-display" id="calcDisplay">0</div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="appendCalc('7')" class="calc-button">7</button>
+          <button onclick="appendCalc('8')" class="calc-button">8</button>
+          <button onclick="appendCalc('9')" class="calc-button">9</button>
+          <button onclick="appendCalc('/')" class="calc-button bg-orange-500 hover:bg-orange-600">÷</button>
+          <button onclick="appendCalc('4')" class="calc-button">4</button>
+          <button onclick="appendCalc('5')" class="calc-button">5</button>
+          <button onclick="appendCalc('6')" class="calc-button">6</button>
+          <button onclick="appendCalc('*')" class="calc-button bg-orange-500 hover:bg-orange-600">×</button>
+          <button onclick="appendCalc('1')" class="calc-button">1</button>
+          <button onclick="appendCalc('2')" class="calc-button">2</button>
+          <button onclick="appendCalc('3')" class="calc-button">3</button>
+          <button onclick="appendCalc('-')" class="calc-button bg-orange-500 hover:bg-orange-600">−</button>
+          <button onclick="appendCalc('0')" class="calc-button">0</button>
+          <button onclick="appendCalc('.')" class="calc-button">.</button>
+          <button onclick="calculateCalc()" class="calc-button bg-emerald-500 hover:bg-emerald-600">=</button>
+          <button onclick="appendCalc('+')" class="calc-button bg-orange-500 hover:bg-orange-600">+</button>
+          <button onclick="clearCalc()" class="calc-button bg-red-500 hover:bg-red-600 col-span-2">Clear</button>
+          <button onclick="backspaceCalc()" class="calc-button bg-slate-600 hover:bg-slate-700 col-span-2">⌫</button>
+        </div>
+      </div>
+
+      <!-- Weight Calculator -->
+      <div class="util-calc-panel">
+        <h3 class="text-sm font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+          <i data-lucide="scale" class="w-4 h-4 text-emerald-600"></i> Film Weight Calculator
+        </h3>
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label-pro">Length (inch)</label>
+              <input id="wCalcLen" type="number" class="input-pro" step="0.01">
+            </div>
+            <div>
+              <label class="label-pro">Width (inch)</label>
+              <input id="wCalcWid" type="number" class="input-pro" step="0.01">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label-pro">Thickness</label>
+              <input id="wCalcThick" type="number" class="input-pro" step="0.1">
+            </div>
+            <div>
+              <label class="label-pro">Unit</label>
+              <select id="wCalcThickUnit" class="input-pro text-xs">
+                <option value="gauge">Gauge</option>
+                <option value="micron">Micron</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="calculateWeight()" class="calc-button w-full">
+            <i data-lucide="zap" class="w-4 h-4 inline mr-2"></i> Calculate
+          </button>
+          <div class="calc-display" id="wCalcResult">0.000 g</div>
+          <div class="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+            <strong>Yield:</strong> <span id="wCalcYield">0</span> pcs/kg
+          </div>
+        </div>
+      </div>
+
+      <!-- GSM Calculator -->
+      <div class="util-calc-panel">
+        <h3 class="text-sm font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-indigo-600"></i> GSM Calculator
+        </h3>
+        <div class="space-y-3">
+          <div>
+            <label class="label-pro">Thickness (Micron)</label>
+            <input id="gsmThick" type="number" class="input-pro" step="0.1">
+          </div>
+          <div>
+            <label class="label-pro">Density (g/cm³)</label>
+            <input id="gsmDensity" type="number" class="input-pro" step="0.001" value="0.923">
+          </div>
+          <button onclick="calculateGSM()" class="calc-button w-full">
+            <i data-lucide="zap" class="w-4 h-4 inline mr-2"></i> Calculate
+          </button>
+          <div class="calc-display" id="gsmResult">0 GSM</div>
+          <div class="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+            Formula: GSM = Thickness(μm) × Density
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Custom Row Modals -->
+<div id="customRowModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+  <div class="glass-card rounded-2xl max-w-2xl w-full p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-black gradient-text">Add Custom Row</h3>
+      <button onclick="closeCustomRowModal()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="label-pro">Description</label>
+        <input id="customRowDesc" type="text" class="input-pro" placeholder="Custom Item">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="label-pro">Quantity</label>
+          <input id="customRowQty" type="number" class="input-pro" placeholder="Qty">
+        </div>
+        <div>
+          <label class="label-pro">Unit</label>
+          <input id="customRowUnit" type="text" class="input-pro" placeholder="Pcs/Kg" value="Pcs">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="label-pro">Rate (₹)</label>
+          <input id="customRowRate" type="number" step="0.01" class="input-pro" placeholder="0.00">
+        </div>
+        <div>
+          <label class="label-pro">Total (₹)</label>
+          <input id="customRowTotal" type="number" step="0.01" class="input-pro" placeholder="Auto">
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="saveCustomRow()" class="flex-1 btn-primary text-white font-bold py-3 rounded-xl">
+          Add Row
+        </button>
+        <button onclick="closeCustomRowModal()" class="px-6 bg-slate-200 text-slate-600 font-bold py-3 rounded-xl">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="customHeaderModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+  <div class="glass-card rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-black gradient-text">Add Section Header</h3>
+      <button onclick="closeCustomHeaderModal()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="label-pro">Header Text</label>
+        <input id="customHeaderText" type="text" class="input-pro" placeholder="e.g. ADDITIONAL ITEMS">
+      </div>
+      <div class="flex gap-3">
+        <button onclick="saveCustomHeader()" class="flex-1 btn-primary text-white font-bold py-3 rounded-xl">
+          Add Header
+        </button>
+        <button onclick="closeCustomHeaderModal()" class="px-6 bg-slate-200 text-slate-600 font-bold py-3 rounded-xl">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-4 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50 border border-white/20">
+   <i id="toastIcon" data-lucide="check-circle" class="w-6 h-6 text-emerald-400"></i>
+   <span id="toastMsg" class="text-sm font-bold">Success</span>
+</div>
+
+<script>
+// --- INITIALIZATION ---
+lucide.createIcons();
+
+const state = {
+   items: [],
+   editIndex: null
+};
+
+const MATERIAL_DENSITIES = {
+  ldpe: 0.923,
+  lldpe: 0.926,
+  hdpe: 0.955,
+  pp: 0.905,
+  bopp: 0.905,
+  bopp_pearl: 0.905,
+  custom: 0.920
+};
+
+// ─────────────────────────────────────────────────────────────
+//  PEARL WEIGHT FORMULA — CORRECTED v3.1r
+//
+//  Physics:  Weight (g) = Length(cm) × Width(cm) × Thick(cm) × Density(g/cm³)
+//
+//  Inputs come as inches + microns, so:
+//    L_cm = L_in × 2.54
+//    W_cm = W_in × 2.54
+//    T_cm = T_mic × 1e-4
+//
+//  ∴ Weight(g) = L_in × W_in × T_mic × Density × (2.54 × 2.54 × 1e-4)
+//              = L_in × W_in × T_mic × Density × 6.4516e-4
+//
+//  Verification: 515mm × 202mm × 32mic × 0.95 density @ ₹163/kg
+//    L_in=20.276  W_in=7.953
+//    Weight = 20.276 × 7.953 × 32 × 0.95 × 6.4516e-4 = 3.163 g
+//    Cost   = 3.163/1000 × 163 = ₹0.515 ✓
+// ─────────────────────────────────────────────────────────────
+const PEARL_FACTOR = 2.54 * 2.54 * 1e-4;  // = 0.00064516
+
+// --- UTILITIES ---
+const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+const getStr = (id) => document.getElementById(id).value || '';
+const setVal = (id, val) => document.getElementById(id).value = val;
+const fmtCurrency = (n) => '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt2 = (n) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt4 = (n) => Number(n).toFixed(4);
+
+// --- MATERIAL MANAGEMENT ---
+function updateMaterialDensity() {
+  const matType = document.getElementById('materialType').value;
+  const densityInput = document.getElementById('materialDensity');
+  const pearlSection = document.getElementById('pearlInsertSection');
+  
+  if (matType === 'bopp_pearl') {
+    pearlSection.classList.remove('hidden');
+    // Default pearl dimensions unit to mm for convenience
+    document.getElementById('lblPearlLen').innerText = 'Pearl Length (mm)';
+    document.getElementById('lblPearlWid').innerText = 'Pearl Width (mm)';
+    togglePearlDims();
+  } else {
+    pearlSection.classList.add('hidden');
+  }
+  
+  if (matType === 'custom') {
+    densityInput.removeAttribute('readonly');
+  } else {
+    densityInput.setAttribute('readonly', 'readonly');
+    densityInput.value = MATERIAL_DENSITIES[matType] || 0.920;
+  }
+  
+  calculate();
+}
+
+function togglePearlDims() {
+  const usePouch = document.getElementById('pearlUsePouch').checked;
+  const pLen = document.getElementById('pearlLength');
+  const pWid = document.getElementById('pearlWidth');
+  
+  if (usePouch) {
+    pLen.setAttribute('readonly', 'readonly');
+    pWid.setAttribute('readonly', 'readonly');
+    pLen.classList.add('bg-slate-100');
+    pWid.classList.add('bg-slate-100');
+    
+    const pouchUnit = document.getElementById('currentUnit').value;
+    const pearlUnit = document.getElementById('pearlUnit').value;
+    let len = getVal('length');
+    let wid = getVal('width');
+    
+    // Convert pouch dims to pearl unit
+    if (pouchUnit !== pearlUnit) {
+      if (pouchUnit === 'inch' && pearlUnit === 'mm') {
+        len = len * 25.4;
+        wid = wid * 25.4;
+      } else if (pouchUnit === 'mm' && pearlUnit === 'inch') {
+        len = len / 25.4;
+        wid = wid / 25.4;
+      }
+      // same unit → no conversion needed
+    }
+    
+    setVal('pearlLength', len.toFixed(2));
+    setVal('pearlWidth', wid.toFixed(2));
+  } else {
+    pLen.removeAttribute('readonly');
+    pWid.removeAttribute('readonly');
+    pLen.classList.remove('bg-slate-100');
+    pWid.classList.remove('bg-slate-100');
+  }
+  
+  const unit = document.getElementById('pearlUnit').value;
+  document.getElementById('lblPearlLen').innerText = unit === 'mm' ? 'Pearl Length (mm)' : 'Pearl Length (inch)';
+  document.getElementById('lblPearlWid').innerText = unit === 'mm' ? 'Pearl Width (mm)' : 'Pearl Width (inch)';
+  
+  calculate();
+}
+
+// --- CALCULATOR ---
+function setUnit(u) {
+   const btnInch = document.getElementById('btnInch');
+   const btnMm = document.getElementById('btnMm');
+   document.getElementById('currentUnit').value = u;
+   
+   if(u === 'inch') {
+      btnInch.className = 'w-1/2 px-3 py-2.5 text-xs font-bold border-2 border-brand-600 bg-brand-600 text-white';
+      btnMm.className = 'w-1/2 px-3 py-2.5 text-xs font-bold border-2 border-gray-300 bg-white text-gray-700';
+      document.getElementById('lblLen').innerText = 'Length (inch)';
+      document.getElementById('lblWid').innerText = 'Width (inch)';
+   } else {
+      btnMm.className = 'w-1/2 px-3 py-2.5 text-xs font-bold border-2 border-brand-600 bg-brand-600 text-white';
+      btnInch.className = 'w-1/2 px-3 py-2.5 text-xs font-bold border-2 border-gray-300 bg-white text-gray-700';
+      document.getElementById('lblLen').innerText = 'Length (mm)';
+      document.getElementById('lblWid').innerText = 'Width (mm)';
+   }
+   calculate();
+}
+
+function toggleAddons() {
+   document.getElementById('addonSection').classList.toggle('hidden');
+   calculate();
+}
+
+function autoCut() {
+   const sealing = document.getElementById('sealing').value;
+   const len = document.getElementById('length').value;
+   const wid = document.getElementById('width').value;
+   setVal('cut', sealing === 'bottom' ? len : wid);
+   
+   if (document.getElementById('pearlUsePouch').checked) {
+     togglePearlDims();
+   }
+}
+
+function syncMask() {
+   const val = document.getElementById('thickness').value;
+   const unit = document.getElementById('thickUnit').value;
+   if(val) setVal('maskThickness', `${val} ${unit === 'micron' ? 'Mic' : 'G'}`);
+}
+
+function syncRef() { 
+   document.getElementById('docRef').innerText = document.getElementById('refNumber').value || '#DRAFT'; 
+   const initials = document.getElementById('creatorInitials').value;
+   document.getElementById('docInitials').innerText = initials ? `By: ${initials}` : '';
+   saveLocal();
+}
+function syncDate() { 
+   document.getElementById('docDate').innerText = document.getElementById('calcDate').value; 
+   saveLocal();
+}
+
+function runCalculate() {
+  calculate();
+  showToast('Calculation updated ✓');
+}
+
+function calculate() {
+   const unit = document.getElementById('currentUnit').value;
+   const thickUnit = document.getElementById('thickUnit').value;
+   const density = getVal('materialDensity');
+   
+   let len = getVal('length');
+   let wid = getVal('width');
+   let cut = getVal('cut');
+   let thick = getVal('thickness');
+   
+   // Convert pouch dims to inches for main film formula
+   const lenIn = unit === 'mm' ? len / 25.4 : len;
+   const widIn = unit === 'mm' ? wid / 25.4 : wid;
+   const cutIn = unit === 'mm' ? cut / 25.4 : cut;
+   
+   // Convert main film thickness to gauge (formula uses gauge)
+   const thickG = thickUnit === 'micron' ? thick * 4 : thick;
+   
+   // Main film weight: industry formula (gauge-based, inches)
+   let baseWt = (lenIn * widIn * thickG) / 3300;
+   
+   let finalWt = baseWt;
+   let pearlWt = 0;
+   let pearlCost = 0;
+   let pearlVol = 0;
+   
+   // ── PEARL CALCULATION (FIXED) ──────────────────────────────
+   // Formula: Weight(g) = L_in × W_in × T_mic × Density × PEARL_FACTOR
+   // where PEARL_FACTOR = 2.54² × 1e-4 = 0.00064516
+   // This is equivalent to: L(cm) × W(cm) × T(cm) × density
+   // ──────────────────────────────────────────────────────────
+   const matType = document.getElementById('materialType').value;
+   if (matType === 'bopp_pearl') {
+     const pearlSheetPrice = getVal('pearlSheetPrice');
+     const pearlDensity    = getVal('pearlDensity');
+     const pearlThickMic   = getVal('pearlThickness');
+     const pearlUnit       = document.getElementById('pearlUnit').value;
+     
+     let pLen = getVal('pearlLength');
+     let pWid = getVal('pearlWidth');
+     
+     // Convert pearl dims to inches for the formula
+     const pLenIn = pearlUnit === 'mm' ? pLen / 25.4 : pLen;
+     const pWidIn = pearlUnit === 'mm' ? pWid / 25.4 : pWid;
+     
+     // Correct physics formula
+     pearlWt   = pLenIn * pWidIn * pearlThickMic * pearlDensity * PEARL_FACTOR;
+     pearlCost = (pearlWt / 1000) * pearlSheetPrice;
+     
+     // Volume for debug display (in cm³)
+     const pLenCm = pLenIn * 2.54;
+     const pWidCm = pWidIn * 2.54;
+     const pThkCm = pearlThickMic * 1e-4;
+     pearlVol = pLenCm * pWidCm * pThkCm;
+     
+     finalWt += pearlWt;
+     
+     // Update debug panel
+     document.getElementById('dispPearlVol').innerText  = pearlVol.toFixed(4);
+     document.getElementById('dispPearlWt').innerText   = pearlWt.toFixed(4) + ' g';
+     document.getElementById('dispPearlCost').innerText = '₹' + pearlCost.toFixed(4);
+   }
+   
+   let totalZipMeters = 0;
+   
+   if(document.getElementById('enableAddons').checked) {
+       const additivePerc = getVal('additivePerc');
+       if(additivePerc > 0) {
+           finalWt = finalWt * (1 + additivePerc / 100);
+       }
+       
+       let zipWtPerPc = getVal('wZip');
+       const zipGm = getVal('zipGm');
+       
+       if (zipGm > 0) {
+           const zipLenMeter = cutIn * 0.0254;
+           zipWtPerPc = zipGm * zipLenMeter;
+           const moq = getVal('moq');
+           totalZipMeters = zipLenMeter * moq;
+       }
+       
+       if(zipWtPerPc > 0) finalWt += zipWtPerPc; 
+       if(getVal('wSlider') > 0) finalWt += getVal('wSlider');
+   }
+   
+   const rm = getVal('rmRate');
+   const wtPerPc = finalWt / 1000;
+   const yieldPerKg = finalWt > 0 ? 1000 / finalWt : 0;
+   const baseYield = baseWt > 0 ? 1000 / baseWt : 0;
+   
+   const materialBase = (wtPerPc * rm) + pearlCost;
+   
+   const zipC  = getVal('zipCost') * cutIn;
+   const glueC = getVal('glueCost') * cutIn;
+   const pktC  = getVal('pktCost') * cutIn;
+   const hdlC  = getVal('hdlCost');
+   const sliC  = getVal('sliderCost');
+   const packC = getVal('packCost');
+   const punchC= getVal('punchCost');
+   
+   let printC = 0;
+   const pMode = document.getElementById('printMode').value;
+   const pCols = getVal('colors');
+   const pRate = getVal('printRate');
+   
+   if(pCols > 0) {
+      if(pMode === 'color_1000') printC = pCols * (pRate / 1000);
+      else if(pMode === 'per_kg') printC = pRate * wtPerPc;
+      else printC = pRate;
+   }
+   
+   const freightC  = wtPerPc * getVal('freight');
+   const setupTotal = getVal('setup');
+   const moq = getVal('moq');
+   const setupPerPc = moq > 0 ? setupTotal / moq : 0;
+   
+   const procTotal  = zipC + glueC + pktC + hdlC + sliC + packC + punchC;
+   const baseCost   = materialBase + procTotal + printC + freightC;
+   
+   const wastageAmt  = baseCost * (getVal('wastage')/100);
+   const costWithWst = baseCost + wastageAmt;
+   const marginAmt   = costWithWst * (getVal('margin')/100);
+   const finalPrice  = costWithWst + marginAmt + setupPerPc;
+   
+   let batchWt = 0;
+   const moqUnit = document.getElementById('moqUnit').value;
+   if(moq > 0) {
+      if(moqUnit === 'pcs') batchWt = (moq * finalWt) / 1000;
+      else batchWt = moq;
+   }
+   
+   if (moqUnit === 'kg' && getVal('zipGm') > 0) {
+       const estimatedPcs = moq * yieldPerKg;
+       totalZipMeters = (cutIn * 0.0254) * estimatedPcs;
+   }
+   
+   document.getElementById('dispPrice').innerText    = fmtCurrency(finalPrice);
+   document.getElementById('dispRm').innerText       = fmtCurrency(materialBase);
+   document.getElementById('dispWt').innerText       = finalWt.toFixed(3);
+   document.getElementById('dispYield').innerText    = yieldPerKg.toFixed(1);
+   document.getElementById('dispBaseYield').innerText= baseYield.toFixed(1);
+   document.getElementById('dispBatch').innerText    = batchWt > 0 ? batchWt.toFixed(2) + ' kg' : '-';
+   
+   document.getElementById('bkMat').innerText    = '₹' + fmt4(materialBase + wastageAmt);
+   document.getElementById('bkProc').innerText   = '₹' + fmt4(procTotal);
+   document.getElementById('bkPrint').innerText  = '₹' + fmt4(printC + setupPerPc);
+   document.getElementById('bkFreight').innerText= '₹' + fmt4(freightC);
+   document.getElementById('bkMargin').innerText = '₹' + fmt4(marginAmt);
+
+   const allData = {
+       materialType: document.getElementById('materialType').value,
+       density: density,
+       length: len, width: wid, thickness: thick, thickUnit: thickUnit, dimUnit: unit,
+       sealing: document.getElementById('sealing').value,
+       rmRate: rm, wastage: getVal('wastage'), margin: getVal('margin'),
+       printMode: pMode, colors: pCols, printRate: pRate,
+       freight: getVal('freight'), setup: setupTotal,
+       zipCost: getVal('zipCost'), glueCost: getVal('glueCost'), pktCost: getVal('pktCost'),
+       hdlCost: getVal('hdlCost'), sliderCost: sliC, packCost: packC, punchCost: punchC,
+       moq: moq, moqUnit: moqUnit,
+       additivePerc: getVal('additivePerc'),
+       zipGm: getVal('zipGm'),
+       wZip: getVal('wZip'),
+       wSlider: getVal('wSlider'),
+       pearlSheetPrice: getVal('pearlSheetPrice'),
+       pearlLength: getVal('pearlLength'),
+       pearlWidth: getVal('pearlWidth'),
+       pearlThickness: getVal('pearlThickness'),
+       pearlDensity: getVal('pearlDensity'),
+       pearlUnit: document.getElementById('pearlUnit').value,
+       pearlWeight: pearlWt,
+       pearlCost: pearlCost,
+       matCost: materialBase + wastageAmt,
+       procCost: procTotal,
+       printCost: printC + setupPerPc,
+       freightCost: freightC,
+       marginAmt: marginAmt,
+       totalZipMeters: totalZipMeters
+   };
+
+   return {
+      price: finalPrice,
+      pricePerKg: finalPrice * yieldPerKg,
+      desc: document.getElementById('itemDesc').value || 'Custom Item',
+      qty: moq,
+      unit: moqUnit,
+      dim: `${len}x${wid} ${unit === 'inch' ? '"' : 'mm'}`,
+      thick: document.getElementById('maskThickness').value,
+      total: finalPrice * (moqUnit === 'pcs' ? moq : (moq * yieldPerKg)),
+      rawInputs: allData,
+      yield: yieldPerKg,
+      finalWt: finalWt,
+      batchWt: batchWt
+   };
+}
+
+// --- QUOTE MANAGEMENT ---
+function addToQuote() {
+   const res = calculate();
+   if(res.price <= 0 || !res.qty) {
+      showToast('Invalid calculation', 'error');
+      return;
+   }
+   
+   const moq = getVal('moq');
+   const unit = document.getElementById('moqUnit').value;
+   
+   let lineTotal = 0;
+   if(unit === 'pcs') lineTotal = res.price * moq;
+   else lineTotal = res.price * (moq * res.yield);
+   
+   if (state.editIndex !== null) {
+       state.items[state.editIndex] = { ...res, lineTotal: lineTotal, type: 'calculated' };
+       showToast('Item updated ✓');
+       cancelEdit();
+   } else {
+       state.items.push({ ...res, lineTotal: lineTotal, type: 'calculated' });
+       showToast('Item added ✓');
+   }
+   
+   renderQuote();
+   saveLocal();
+}
+
+function editItem(index) {
+    const item = state.items[index];
+    if (!item || item.type !== 'calculated') return;
+    
+    const d = item.rawInputs;
+    
+    setVal('itemDesc', item.desc);
+    setVal('moq', d.moq);
+    document.getElementById('moqUnit').value = d.moqUnit;
+    
+    document.getElementById('materialType').value = d.materialType || 'ldpe';
+    setVal('materialDensity', d.density || 0.923);
+    updateMaterialDensity();
+    
+    setUnit(d.dimUnit || 'inch'); 
+    setVal('length', d.length);
+    setVal('width', d.width);
+    
+    document.getElementById('thickUnit').value = d.thickUnit;
+    setVal('thickness', d.thickness);
+    
+    setVal('sealing', d.sealing);
+    setVal('rmRate', d.rmRate);
+    setVal('wastage', d.wastage);
+    setVal('margin', d.margin);
+    
+    document.getElementById('printMode').value = d.printMode;
+    setVal('colors', d.colors);
+    setVal('printRate', d.printRate);
+    
+    setVal('freight', d.freight);
+    setVal('setup', d.setup);
+    
+    setVal('zipCost', d.zipCost);
+    setVal('glueCost', d.glueCost);
+    setVal('pktCost', d.pktCost);
+    setVal('hdlCost', d.hdlCost);
+    setVal('sliderCost', d.sliderCost);
+    setVal('packCost', d.packCost);
+    setVal('punchCost', d.punchCost);
+    
+    if (d.materialType === 'bopp_pearl') {
+      document.getElementById('pearlUnit').value = d.pearlUnit || 'mm';
+      setVal('pearlSheetPrice', d.pearlSheetPrice);
+      setVal('pearlLength', d.pearlLength);
+      setVal('pearlWidth', d.pearlWidth);
+      setVal('pearlThickness', d.pearlThickness);
+      setVal('pearlDensity', d.pearlDensity);
+    }
+    
+    if (d.additivePerc > 0 || d.zipGm > 0 || d.wZip > 0 || d.wSlider > 0) {
+        document.getElementById('enableAddons').checked = true;
+        document.getElementById('addonSection').classList.remove('hidden');
+        setVal('additivePerc', d.additivePerc);
+        setVal('zipGm', d.zipGm);
+        setVal('wZip', d.wZip);
+        setVal('wSlider', d.wSlider);
+    }
+    
+    state.editIndex = index;
+    
+    const btn = document.getElementById('addBtn');
+    btn.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i> Update Item';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-edit');
+    
+    document.getElementById('cancelEditBtn').classList.remove('hidden');
+    
+    syncMask();
+    autoCut();
+    calculate();
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    lucide.createIcons();
+}
+
+function cancelEdit() {
+    state.editIndex = null;
+    const btn = document.getElementById('addBtn');
+    btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> Add Item to Quote';
+    btn.classList.add('btn-primary');
+    btn.classList.remove('btn-edit');
+    document.getElementById('cancelEditBtn').classList.add('hidden');
+    clearCalculator();
+    lucide.createIcons();
+}
+
+function deleteItem(index) {
+   if(confirm('Delete this item?')) {
+       state.items.splice(index, 1);
+       if (state.editIndex === index) cancelEdit();
+       renderQuote();
+       saveLocal();
+   }
+}
+
+// --- CUSTOM ROWS ---
+function addCustomHeader() {
+  document.getElementById('customHeaderModal').classList.remove('hidden');
+  document.getElementById('customHeaderText').value = '';
+  lucide.createIcons();
+}
+
+function closeCustomHeaderModal() {
+  document.getElementById('customHeaderModal').classList.add('hidden');
+}
+
+function saveCustomHeader() {
+  const text = document.getElementById('customHeaderText').value.trim();
+  if (!text) { showToast('Header required', 'error'); return; }
+  state.items.push({ type: 'header', text: text });
+  renderQuote();
+  saveLocal();
+  closeCustomHeaderModal();
+  showToast('Header added ✓');
+}
+
+function addCustomRow() {
+  document.getElementById('customRowModal').classList.remove('hidden');
+  document.getElementById('customRowDesc').value = '';
+  document.getElementById('customRowQty').value = '';
+  document.getElementById('customRowUnit').value = 'Pcs';
+  document.getElementById('customRowRate').value = '';
+  document.getElementById('customRowTotal').value = '';
+  lucide.createIcons();
+}
+
+function closeCustomRowModal() {
+  document.getElementById('customRowModal').classList.add('hidden');
+}
+
+function saveCustomRow() {
+  const desc  = document.getElementById('customRowDesc').value.trim();
+  const qty   = parseFloat(document.getElementById('customRowQty').value) || 0;
+  const unit  = document.getElementById('customRowUnit').value || 'Pcs';
+  const rate  = parseFloat(document.getElementById('customRowRate').value) || 0;
+  let   total = parseFloat(document.getElementById('customRowTotal').value) || 0;
+  
+  if (!desc) { showToast('Description required', 'error'); return; }
+  if (total === 0) total = qty * rate;
+  
+  state.items.push({
+    type: 'custom',
+    desc: desc,
+    qty: qty,
+    unit: unit,
+    price: rate,
+    pricePerKg: 0,
+    lineTotal: total,
+    dim: '-',
+    thick: '-',
+    finalWt: 0,
+    yield: 0
+  });
+  
+  renderQuote();
+  saveLocal();
+  closeCustomRowModal();
+  showToast('Custom row added ✓');
+}
+
+// --- RENDERING ---
+function renderQuote() {
+   const tbody = document.querySelector('#quoteTable tbody');
+   const thead = document.querySelector('#quoteTable thead');
+   const empty = document.getElementById('emptyState');
+   
+   const showFin    = document.getElementById('showFinancials').checked;
+   const showSpecs  = document.getElementById('showSpecs').checked;
+   const showThick  = document.getElementById('showThickness').checked;
+   const showBatch  = document.getElementById('showBatchWeight').checked;
+   const showTotPcs = document.getElementById('showTotalPcs').checked;
+   const showPcPrice= document.getElementById('showPerPcPrice').checked;
+   const showKgPrice= document.getElementById('showPerKgPrice').checked;
+   const showMat    = document.getElementById('showMaterial').checked;
+   const showPcWt   = document.getElementById('showPieceWt').checked;
+   const showBreakup= document.getElementById('showCostBreakup').checked;
+
+   let h = `<tr>
+              <th class="py-3 pl-2 text-center">#</th>
+              <th class="py-3">Description</th>
+              <th class="py-3 text-center">Qty</th>`;
+   
+   if (showMat)    h += `<th class="py-3 text-center">Material</th>`;
+   if (showThick)  h += `<th class="py-3 text-center">Thickness</th>`;
+   if (showBatch)  h += `<th class="py-3 text-center">Batch Wt</th>`;
+   if (showTotPcs) h += `<th class="py-3 text-center">Total Pcs</th>`;
+   if (showPcWt)   h += `<th class="py-3 text-right">Pc Wt(g)</th>`;
+   if (showPcPrice)h += `<th class="py-3 text-right">Rate/Pc</th>`;
+   if (showKgPrice)h += `<th class="py-3 text-right">Rate/Kg</th>`;
+   if (showFin)    h += `<th class="py-3 text-right pr-2">Total</th>`;
+   h += `<th class="py-3 w-20 text-center no-print">Actions</th></tr>`;
+   
+   thead.innerHTML = h;
+   tbody.innerHTML = '';
+   
+   if(state.items.length === 0) {
+      empty.style.display = 'block';
+      document.getElementById('grandTotal').innerText = '₹0.00';
+      document.getElementById('footerFinancials').classList.add('hidden');
+      lucide.createIcons();
+      return;
+   }
+   
+   empty.style.display = 'none';
+   if(showFin) document.getElementById('footerFinancials').classList.remove('hidden');
+   else document.getElementById('footerFinancials').classList.add('hidden');
+
+   let grand = 0;
+   let itemIndex = 1;
+   
+   state.items.forEach((item, i) => {
+      if (item.type === 'header') {
+        tbody.innerHTML += `<tr class="custom-row-header">
+          <td colspan="20" class="py-3 px-4">
+            <div class="flex justify-between items-center">
+              <span class="font-black text-slate-700">${item.text}</span>
+              <button onclick="deleteItem(${i})" class="no-print text-red-400 hover:text-red-600">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+        lucide.createIcons();
+        return;
+      }
+      
+      grand += item.lineTotal || 0;
+      const d = item.rawInputs || {};
+      const tPcs = item.unit === 'kg' ? item.qty * item.yield : item.qty;
+      
+      let matInfo = '-';
+      if (item.type === 'calculated' && d.materialType) {
+        const matNames = {
+          ldpe: 'LDPE', lldpe: 'LLDPE', hdpe: 'HDPE', 
+          pp: 'PP', bopp: 'BOPP', bopp_pearl: 'BOPP+Pearl'
+        };
+        matInfo = matNames[d.materialType] || d.materialType.toUpperCase();
+        if (d.pearlWeight > 0) matInfo += ` (${d.pearlWeight.toFixed(2)}g)`;
+      }
+      
+      let specsHtml = '';
+      if (showSpecs && item.type === 'calculated') {
+        const arr = [];
+        if (d.printMode && d.colors > 0) arr.push(`${d.colors}C`);
+        if (d.additivePerc > 0) arr.push(`Add:${d.additivePerc}%`);
+        if (d.zipGm > 0) arr.push('Zip');
+        if (arr.length > 0) specsHtml = `<div class="text-[9px] text-slate-500 mt-0.5">${arr.join(' · ')}</div>`;
+      }
+
+      let row = `<tr class="hover:bg-blue-50 transition-all border-b border-slate-100">
+           <td class="py-3 pl-2 text-center text-xs font-bold text-slate-500">${itemIndex++}</td>
+           <td class="py-3">
+              <div class="font-bold text-slate-800 text-sm">${item.desc}</div>
+              ${item.dim !== '-' ? `<div class="text-[9px] text-slate-500 mt-0.5">${item.dim}</div>` : ''}
+              ${specsHtml}
+           </td>
+           <td class="text-center font-bold text-slate-700">${item.qty} <span class="text-[9px] uppercase text-slate-500">${item.unit}</span></td>`;
+      
+      if (showMat)    row += `<td class="text-center text-[10px] text-slate-600">${matInfo}</td>`;
+      if (showThick)  row += `<td class="text-center text-[10px] text-slate-600">${item.thick}</td>`;
+      if (showBatch)  row += `<td class="text-center text-[10px] text-amber-600 font-bold">${item.batchWt ? fmt2(item.batchWt) : '-'}</td>`;
+      if (showTotPcs) row += `<td class="text-center text-[10px] text-purple-600 font-bold">${fmt2(tPcs)}</td>`;
+      if (showPcWt)   row += `<td class="text-right text-[10px] text-slate-600 font-mono">${(item.finalWt||0).toFixed(3)}</td>`;
+      if (showPcPrice)row += `<td class="text-right text-[10px] font-mono font-bold text-slate-700">₹${fmt4(item.price)}</td>`;
+      if (showKgPrice)row += `<td class="text-right text-[10px] font-mono font-bold text-slate-700">₹${fmt4(item.pricePerKg)}</td>`;
+      if (showFin)    row += `<td class="text-right font-black text-slate-800 pr-2">₹${(item.lineTotal || 0).toLocaleString('en-IN', {maximumFractionDigits:0})}</td>`;
+      
+      row += `<td class="text-center no-print flex justify-center gap-2 py-3">`;
+      if (item.type === 'calculated') {
+        row += `<button onclick="editItem(${i})" class="text-blue-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>`;
+      }
+      row += `<button onclick="deleteItem(${i})" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+           </td></tr>`;
+      
+      // Full breakup row
+      if (showBreakup && item.type === 'calculated') {
+        const totalCostPc = (d.matCost||0) + (d.procCost||0) + (d.printCost||0) + (d.freightCost||0);
+        row += `<tr class="bg-gradient-to-r from-slate-50 to-blue-50 border-b-2 border-blue-100 no-print">
+          <td></td>
+          <td colspan="20" class="pb-3 pt-1 pl-3 pr-2">
+            <div class="flex flex-wrap gap-2 text-[9px]">
+              <div class="bg-blue-100 border border-blue-200 rounded-lg px-2 py-1.5 min-w-[90px]">
+                <div class="font-black text-blue-800 mb-0.5">MATERIAL</div>
+                <div class="font-mono text-blue-900 font-bold">₹${fmt4(d.matCost||0)}</div>
+              </div>
+              ${(d.pearlCost||0)>0?`<div class="bg-purple-100 border border-purple-200 rounded-lg px-2 py-1.5 min-w-[90px]">
+                <div class="font-black text-purple-800 mb-0.5">PEARL INSERT</div>
+                <div class="font-mono text-purple-900 font-bold">₹${fmt4(d.pearlCost||0)}</div>
+                <div class="text-purple-700">${(d.pearlWeight||0).toFixed(3)}g</div>
+              </div>`:''}
+              ${(d.procCost||0)>0?`<div class="bg-indigo-100 border border-indigo-200 rounded-lg px-2 py-1.5 min-w-[90px]">
+                <div class="font-black text-indigo-800 mb-0.5">PROCESS</div>
+                <div class="font-mono text-indigo-900 font-bold">₹${fmt4(d.procCost||0)}</div>
+              </div>`:''}
+              ${(d.printCost||0)>0?`<div class="bg-cyan-100 border border-cyan-200 rounded-lg px-2 py-1.5 min-w-[90px]">
+                <div class="font-black text-cyan-800 mb-0.5">PRINT</div>
+                <div class="font-mono text-cyan-900 font-bold">₹${fmt4(d.printCost||0)}</div>
+              </div>`:''}
+              ${(d.freightCost||0)>0?`<div class="bg-amber-100 border border-amber-200 rounded-lg px-2 py-1.5 min-w-[90px]">
+                <div class="font-black text-amber-800 mb-0.5">FREIGHT</div>
+                <div class="font-mono text-amber-900 font-bold">₹${fmt4(d.freightCost||0)}</div>
+              </div>`:''}
+              <div class="bg-emerald-100 border border-emerald-200 rounded-lg px-2 py-1.5 min-w-[90px]">
+                <div class="font-black text-emerald-800 mb-0.5">MARGIN ${d.margin||0}%</div>
+                <div class="font-mono text-emerald-900 font-bold">₹${fmt4(d.marginAmt||0)}</div>
+              </div>
+            </div>
+          </td>
+        </tr>`;
+      }
+
+      tbody.innerHTML += row;
+   });
+   
+   document.getElementById('grandTotal').innerText = fmtCurrency(grand);
+   lucide.createIcons();
+}
+
+// --- ANALYTICS ---
+function showAnalyticsModal() {
+  if (state.items.length === 0) { showToast('No items to analyze', 'error'); return; }
+
+  const grandTotal = state.items.reduce((s, i) => s + (i.lineTotal||0), 0);
+  const totalBatch = state.items.reduce((s, i) => s + (i.batchWt||0), 0);
+
+  let html = `
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white text-center">
+        <div class="text-2xl font-black">${state.items.filter(i=>i.type!=='header').length}</div>
+        <div class="text-xs font-semibold opacity-90 mt-1">Items</div>
+      </div>
+      <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white text-center">
+        <div class="text-2xl font-black">${totalBatch.toFixed(1)}<span class="text-sm"> kg</span></div>
+        <div class="text-xs font-semibold opacity-90 mt-1">Total Batch</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white text-center">
+        <div class="text-2xl font-black">${state.items.reduce((s,i)=>(i.unit==='kg'?s+(i.qty*(i.yield||0)):s+(i.qty||0)),0).toFixed(0)}</div>
+        <div class="text-xs font-semibold opacity-90 mt-1">Total Pcs</div>
+      </div>
+      <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white text-center">
+        <div class="text-xl font-black">${fmtCurrency(grandTotal)}</div>
+        <div class="text-xs font-semibold opacity-90 mt-1">Grand Total</div>
+      </div>
+    </div>`;
+
+  state.items.forEach((item, idx) => {
+    if (item.type === 'header') return;
+    const d = item.rawInputs || {};
+    const totalCost = (d.matCost||0) + (d.procCost||0) + (d.printCost||0) + (d.freightCost||0);
+    const tPcs = item.unit === 'kg' ? item.qty * item.yield : item.qty;
+
+    html += `
+      <div class="mb-5 border-2 border-slate-200 rounded-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-5 py-3 flex items-center justify-between">
+          <div class="font-bold text-white">#${idx+1}: ${item.desc}</div>
+          <div class="text-amber-300 font-black text-sm">${fmtCurrency(item.lineTotal||0)}</div>
+        </div>
+        <div class="p-5">
+          <div class="grid md:grid-cols-3 gap-4 mb-4">
+            <div class="bg-slate-50 rounded-lg p-3 text-sm">
+              <div class="font-black text-slate-700 text-xs uppercase mb-2">Specs</div>
+              <div class="space-y-0.5 text-xs">
+                <div><span class="text-slate-500">Size:</span> <strong>${item.dim}</strong></div>
+                <div><span class="text-slate-500">Thickness:</span> <strong>${item.thick || '-'}</strong></div>
+                <div><span class="text-slate-500">Piece Wt:</span> <strong>${(item.finalWt||0).toFixed(3)} g</strong></div>
+                <div><span class="text-slate-500">Yield:</span> <strong>${(item.yield||0).toFixed(1)} pcs/kg</strong></div>
+                <div><span class="text-slate-500">Batch:</span> <strong>${(item.batchWt||0).toFixed(2)} kg</strong></div>
+                ${(d.pearlWeight||0)>0?`<div><span class="text-purple-500">Pearl Wt:</span> <strong class="text-purple-700">${(d.pearlWeight||0).toFixed(3)} g → ₹${(d.pearlCost||0).toFixed(4)}</strong></div>`:''}
+              </div>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-3 text-sm">
+              <div class="font-black text-blue-700 text-xs uppercase mb-2">Inputs</div>
+              <div class="space-y-0.5 text-xs">
+                <div><span class="text-slate-500">RM:</span> <strong>₹${d.rmRate||0}/kg</strong></div>
+                <div><span class="text-slate-500">Wastage:</span> <strong>${d.wastage||0}%</strong></div>
+                <div><span class="text-slate-500">Margin:</span> <strong>${d.margin||0}%</strong></div>
+              </div>
+            </div>
+            <div class="bg-emerald-50 rounded-lg p-3 text-sm">
+              <div class="font-black text-emerald-700 text-xs uppercase mb-2">Price</div>
+              <div class="space-y-0.5 text-xs">
+                <div class="flex justify-between"><span>Total Cost:</span> <strong>₹${totalCost.toFixed(4)}</strong></div>
+                <div class="flex justify-between"><span>Margin:</span> <strong class="text-emerald-600">₹${(d.marginAmt||0).toFixed(4)}</strong></div>
+                <div class="flex justify-between border-t pt-1 mt-1"><span class="font-bold">Unit:</span> <strong class="text-emerald-700">₹${(item.price||0).toFixed(4)}</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('analyticsContent').innerHTML = html;
+  document.getElementById('analyticsModal').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+// --- UTILITY CALCULATORS ---
+function showUtilityCalc() {
+  document.getElementById('utilityModal').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+function convertUnits() {
+  const val = getVal('unitValue');
+  const from = document.getElementById('unitFrom').value;
+  const to   = document.getElementById('unitTo').value;
+  let result = 0;
+  
+  if (from === 'inch'  && to === 'mm')    result = val * 25.4;
+  else if (from === 'mm'   && to === 'inch')   result = val / 25.4;
+  else if (from === 'inch'  && to === 'cm')    result = val * 2.54;
+  else if (from === 'cm'   && to === 'inch')   result = val / 2.54;
+  else if (from === 'mm'   && to === 'cm')     result = val / 10;
+  else if (from === 'cm'   && to === 'mm')     result = val * 10;
+  else if (from === 'cm'   && to === 'meter')  result = val / 100;
+  else if (from === 'meter'&& to === 'cm')     result = val * 100;
+  else if (from === 'mm'   && to === 'meter')  result = val / 1000;
+  else if (from === 'meter'&& to === 'mm')     result = val * 1000;
+  else if (from === 'inch'  && to === 'meter') result = val * 0.0254;
+  else if (from === 'meter'&& to === 'inch')   result = val / 0.0254;
+  else if (from === 'gauge' && to === 'micron')result = val / 4;
+  else if (from === 'micron'&& to === 'gauge') result = val * 4;
+  else result = val;
+  
+  document.getElementById('unitResult').innerText = result.toFixed(4);
+}
+
+let calcValue = '0';
+function appendCalc(v) {
+  if (calcValue === '0' && v !== '.') calcValue = v;
+  else calcValue += v;
+  document.getElementById('calcDisplay').innerText = calcValue;
+}
+function calculateCalc() {
+  try {
+    calcValue = eval(calcValue).toString();
+    document.getElementById('calcDisplay').innerText = calcValue;
+  } catch(e) {
+    document.getElementById('calcDisplay').innerText = 'Error';
+    calcValue = '0';
+  }
+}
+function clearCalc() { calcValue = '0'; document.getElementById('calcDisplay').innerText = '0'; }
+function backspaceCalc() { calcValue = calcValue.slice(0, -1) || '0'; document.getElementById('calcDisplay').innerText = calcValue; }
+
+function calculateWeight() {
+  const len  = getVal('wCalcLen');
+  const wid  = getVal('wCalcWid');
+  const thick= getVal('wCalcThick');
+  const unit = document.getElementById('wCalcThickUnit').value;
+  const thickG = unit === 'micron' ? thick * 4 : thick;
+  const wt = (len * wid * thickG) / 3300;
+  const yld = wt > 0 ? 1000 / wt : 0;
+  document.getElementById('wCalcResult').innerText = wt.toFixed(3) + ' g';
+  document.getElementById('wCalcYield').innerText  = yld.toFixed(1);
+}
+
+function calculateGSM() {
+  const thick   = getVal('gsmThick');
+  const density = getVal('gsmDensity');
+  document.getElementById('gsmResult').innerText = (thick * density).toFixed(2) + ' GSM';
+}
+
+// --- PERSISTENCE ---
+function saveLocal() {
+   const data = {
+      ref:      document.getElementById('refNumber').value,
+      date:     document.getElementById('calcDate').value,
+      initials: document.getElementById('creatorInitials').value,
+      client:   document.getElementById('clientName').value,
+      clientDet:document.getElementById('clientDetails').value,
+      items:    state.items
+   };
+   localStorage.setItem('plastoData', JSON.stringify(data));
+}
+
+function loadLocal() {
+   const raw = localStorage.getItem('plastoData');
+   if(raw) {
+      try {
+        const d = JSON.parse(raw);
+        if(d.ref)      setVal('refNumber', d.ref);
+        if(d.date)     setVal('calcDate', d.date);
+        if(d.initials) setVal('creatorInitials', d.initials);
+        if(d.client)   setVal('clientName', d.client);
+        if(d.clientDet)setVal('clientDetails', d.clientDet);
+        if(d.items && d.items.length > 0) { state.items = d.items; renderQuote(); }
+        syncRef(); 
+        syncDate();
+      } catch(e) {}
+   } else {
+      document.getElementById('calcDate').valueAsDate = new Date();
+      syncDate();
+   }
+}
+
+// --- EXPORT ---
+function triggerImport() { document.getElementById('importFile').click(); }
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if(data.items) state.items = data.items;
+            renderQuote();
+            saveLocal();
+            showToast('Project loaded ✓');
+        } catch(err) {
+            showToast('Invalid file', 'error');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function saveProjectFile() {
+    const projectData = {
+        meta: {
+            ref:      document.getElementById('refNumber').value,
+            date:     document.getElementById('calcDate').value,
+            initials: document.getElementById('creatorInitials').value
+        },
+        items: state.items,
+        timestamp: new Date().toISOString()
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData));
+    const a = document.createElement('a');
+    a.setAttribute("href", dataStr);
+    a.setAttribute("download", `Plasto_${projectData.meta.ref || 'DRAFT'}.json`);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('Project saved ✓');
+}
+
+async function imageToBase64(imgEl) {
+  return new Promise((resolve) => {
+    if (imgEl.src && imgEl.src.startsWith('data:')) { resolve(imgEl.src); return; }
+    const canvas = document.createElement('canvas');
+    canvas.width  = imgEl.naturalWidth  || 200;
+    canvas.height = imgEl.naturalHeight || 80;
+    const ctx = canvas.getContext('2d');
+    const tempImg = new Image();
+    tempImg.crossOrigin = 'anonymous';
+    tempImg.onload  = () => { ctx.drawImage(tempImg, 0, 0); resolve(canvas.toDataURL('image/png')); };
+    tempImg.onerror = () => resolve(imgEl.src);
+    tempImg.src = imgEl.src + '?_cb=' + Date.now();
+  });
+}
+
+async function handleExport() {
+    if(state.items.length === 0) return showToast('Quote is empty', 'error');
+    const btn = document.getElementById('pdfBtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin inline mr-2"></i>Generating...';
+    btn.disabled = true;
+    lucide.createIcons();
+    try {
+        await downloadPDF();
+        showToast('PDF generated ✓');
+    } catch (e) {
+        showToast('PDF error', 'error');
+    } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        lucide.createIcons();
+    }
+}
+
+async function downloadPDF() {
+    return new Promise(async (resolve, reject) => {
+        const logoEl = document.getElementById('quoteLogo');
+        const originalLogoSrc = logoEl ? logoEl.src : null;
+        if (logoEl) {
+          try { const b64 = await imageToBase64(logoEl); logoEl.src = b64; await new Promise(r => setTimeout(r, 100)); } catch(e) {}
+        }
+        document.body.classList.add('pdf-export-mode');
+        const replacements = [];
+        document.querySelectorAll('#quoteCard textarea').forEach(ta => {
+           const div = document.createElement('div');
+           div.style.cssText = window.getComputedStyle(ta).cssText;
+           div.style.whiteSpace = 'pre-wrap';
+           div.textContent = ta.value;
+           ta.parentNode.insertBefore(div, ta);
+           ta.style.display = 'none';
+           replacements.push({ element: ta, div });
+        });
+        const el = document.getElementById('quoteCard');
+        const opt = {
+          margin: 0.3,
+          filename: `Quote_${document.getElementById('refNumber').value || 'DRAFT'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(el).save().then(() => {
+           document.body.classList.remove('pdf-export-mode');
+           if (logoEl && originalLogoSrc) logoEl.src = originalLogoSrc;
+           replacements.forEach(r => {
+              if(r.div.parentNode) r.div.parentNode.removeChild(r.div);
+              r.element.style.display = '';
+           });
+           resolve();
+        }).catch(reject);
+    });
+}
+
+function clearQuote() {
+   if(state.items.length === 0) return;
+   if(confirm('Clear all items?')) {
+       state.items = [];
+       state.editIndex = null;
+       renderQuote();
+       saveLocal(); 
+       showToast('Quote cleared');
+   }
+}
+
+function showToast(msg, type='success') {
+   const t    = document.getElementById('toast');
+   const icon = document.getElementById('toastIcon');
+   const txt  = document.getElementById('toastMsg');
+   txt.innerText = msg;
+   if(type === 'error') {
+      icon.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>';
+      icon.classList.remove('text-emerald-400');
+      icon.classList.add('text-red-400');
+   } else {
+      icon.innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>';
+      icon.classList.add('text-emerald-400');
+      icon.classList.remove('text-red-400');
+   }
+   t.classList.remove('translate-y-20', 'opacity-0');
+   setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+}
+
+function loadSampleData() {
+   setVal('refNumber', 'SAMPLE-001');
+   setVal('itemDesc', 'BOPP Bag with Pearl Insert');
+   document.getElementById('materialType').value = 'bopp_pearl';
+   updateMaterialDensity();
+   document.getElementById('pearlUnit').value = 'mm';
+   setVal('pearlSheetPrice', 163);
+   setVal('pearlThickness', 32);
+   setVal('pearlLength', 515);
+   setVal('pearlWidth', 202);
+   setVal('pearlDensity', 0.950);
+   document.getElementById('pearlUsePouch').checked = false;
+   togglePearlDims();
+   setVal('length', 515);
+   setVal('width', 202);
+   document.getElementById('currentUnit').value = 'mm';
+   setUnit('mm');
+   setVal('thickness', 200);
+   document.getElementById('thickUnit').value = 'gauge';
+   setVal('rmRate', 120);
+   setVal('moq', 5000);
+   setVal('wastage', 3);
+   setVal('margin', 15);
+   setVal('colors', 2);
+   setVal('printRate', 500); 
+   autoCut();
+   syncMask();
+   syncRef();
+   calculate();
+   showToast('Sample loaded — Pearl: 515×202mm 32mic @ ₹163/kg = ₹0.515/pc ✓');
+}
+
+function clearCalculator() {
+   document.querySelectorAll('#mainContainer input[type=number], #mainContainer input[type=text]').forEach(i => {
+       if(i.id !== 'calcDate' && i.id !== 'refNumber' && i.id !== 'creatorInitials') i.value = '';
+   });
+   document.getElementById('materialType').value = 'ldpe';
+   updateMaterialDensity();
+   calculate();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    loadLocal();
+    updateMaterialDensity();
+});
+</script>
+</body>
+</html>

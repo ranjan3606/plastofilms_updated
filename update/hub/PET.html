@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bag Price Calculator — Composite Layer Engine</title>
+
+<!-- html2pdf -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        colors: {
+          gray: { 850: '#1f2937', 950: '#030712' },
+          brand: {
+            50: '#f0f9ff',
+            100: '#e0f2fe',
+            500: '#0ea5e9',
+            600: '#0284c7',
+            700: '#0369a1',
+            800: '#075985',
+            900: '#0c4a6e',
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+  input, select, textarea { transition: all 0.2s; }
+  input:focus, select:focus, textarea:focus { 
+    outline: none; 
+    border-color: #0ea5e9; 
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); 
+  }
+  
+  /* Company Branding Colors */
+  .plasto-color { color: #E74C3C; }
+  .films-color { color: #3498DB; }
+
+  /* Pro Inputs */
+  .input-pro {
+    font-size: 0.875rem; 
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    color: #111827;
+    font-weight: 500;
+  }
+  .label-pro {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Section Divider */
+  .section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+  
+  /* Calc Buttons */
+  .calc-btn {
+    background: #f3f4f6; border-radius: 0.5rem; padding: 1rem;
+    font-weight: 600; font-size: 1.125rem; color: #374151; transition: background 0.1s;
+    cursor: pointer;
+  }
+  .calc-btn:active { background: #e5e7eb; }
+  .calc-btn.op { background: #e0f2fe; color: #0284c7; }
+  .calc-btn.sci { background: #7c3aed; color: white; font-size: 0.85rem; font-weight: 700; }
+  .calc-btn.sci:hover { background: #6d28d9; }
+  .calc-btn.eq { background: #0284c7; color: white; }
+
+  /* PDF Footer - Hidden by default in view mode */
+  #pdfFooter { display: none; }
+
+  /* TIGHT TABLE STYLES FOR PDF & VIEW */
+  .compact-row td, .compact-row th {
+      padding-top: 4px;
+      padding-bottom: 4px;
+      padding-left: 8px;
+      padding-right: 8px;
+  }
+
+  /* --- PDF Export Mode Specific Styles --- */
+  
+  body.pdf-export-mode {
+      background-color: white !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+  }
+
+  /* Reset layout containers for PDF */
+  body.pdf-export-mode #mainContainer {
+      display: block !important;
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+  }
+
+  body.pdf-export-mode .lg\:col-span-7 {
+      display: none !important;
+  }
+
+  body.pdf-export-mode .lg\:col-span-5 {
+      width: 100% !important;
+      margin: 0 !important;
+  }
+
+  /* Hide UI elements */
+  body.pdf-export-mode .no-print-section,
+  body.pdf-export-mode .del-btn,
+  body.pdf-export-mode button {
+      display: none !important;
+  }
+
+  /* Flatten inputs/textareas */
+  body.pdf-export-mode input:not([type="checkbox"]), 
+  body.pdf-export-mode textarea, 
+  body.pdf-export-mode select {
+      border: none !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      outline: none !important;
+      resize: none !important;
+      appearance: none;
+      -webkit-appearance: none;
+      font-weight: 600;
+      color: #1f2937 !important;
+      min-height: 1.2em;
+  }
+  
+  body.pdf-export-mode ::placeholder {
+      color: transparent;
+  }
+
+  body.pdf-export-mode textarea {
+      height: auto !important; 
+      overflow: visible !important;
+      display: block;
+      white-space: pre-wrap;
+  }
+
+  /* Center Alignments */
+  body.pdf-export-mode td input[type="number"], 
+  body.pdf-export-mode td input[type="text"],
+  body.pdf-export-mode .text-center input {
+      text-align: center !important;
+  }
+  
+  body.pdf-export-mode .text-right input {
+      text-align: right !important;
+  }
+
+  /* Quote Card Document Styling for PDF */
+  body.pdf-export-mode #quoteCard {
+      border: none !important;
+      box-shadow: none !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 20px 40px !important; /* Add padding to look like a document page */
+      border-radius: 0 !important;
+  }
+
+  /* Show PDF footer during export */
+  body.pdf-export-mode #pdfFooter {
+      display: flex !important; /* Changed to flex to handle layout */
+  }
+
+  /* Highlight Effect */
+  @keyframes highlight {
+    0% { background-color: #ecfdf5; }
+    100% { background-color: transparent; }
+  }
+  .animate-highlight {
+    animation: highlight 1.5s ease-out;
+  }
+
+</style>
+</head>
+<body class="bg-gray-50 text-slate-800 p-2 md:p-6 pb-32">
+
+<div id="mainContainer" class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+
+  <!-- Left Column: Calculator -->
+  <div class="lg:col-span-7 space-y-5 no-print-section">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex justify-between items-start">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-slate-200 shadow-sm overflow-hidden p-1 relative">
+           <img src="images/logo.png" alt="Logo" class="max-w-full max-h-full absolute z-10" onerror="this.style.display='none'; document.getElementById('fallbackP').style.display='block';">
+           <div id="fallbackP" class="font-bold text-2xl text-brand-600 hidden">B</div>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900 leading-tight">Price Calculator</h1>
+          <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Multi-Layer Composite Engine</p>
+        </div>
+      </div>
+      
+      <label class="flex items-center gap-2 cursor-pointer bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-colors select-none border border-slate-200">
+        <input type="checkbox" id="useSampleData" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500 border-gray-300">
+        <span class="text-xs font-bold text-slate-600">Sample Data</span>
+      </label>
+    </div>
+
+    <!-- Calculator Form -->
+    <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden" id="calculatorCard">
+      
+      <!-- Meta Data Bar -->
+      <div class="bg-slate-50 border-b border-slate-200 p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <label class="label-pro">Ref. No</label>
+          <input id="refNumber" type="text" class="input-pro" placeholder="Ref #" oninput="updateRef(this.value)">
+        </div>
+        <div>
+          <label class="label-pro">Date</label>
+          <input id="calcDate" type="date" class="input-pro" oninput="updateDate(this.value)">
+        </div>
+        <div>
+          <label class="label-pro">Order Qty (Kg)</label>
+          <input id="totalKg" type="number" min="1" class="input-pro" placeholder="Total Kg" onchange="syncQty('kg')">
+        </div>
+        <div>
+           <label class="label-pro">Order Qty (Pcs)</label>
+           <input id="totalPcs" type="number" min="1" class="input-pro" placeholder="Total Pcs" onchange="syncQty('pcs')">
+        </div>
+      </div>
+
+      <div class="p-5 space-y-6">
+        
+        <!-- Product Specs -->
+        <div>
+          <div class="section-title">Bag Specifications</div>
+          
+          <div class="grid grid-cols-12 gap-4 mb-4">
+             <div class="col-span-12 md:col-span-8">
+               <label class="label-pro">Description</label>
+               <input id="itemDesc" type="text" class="input-pro" placeholder="Item Name & Details">
+             </div>
+             <div class="col-span-12 md:col-span-4">
+                <label class="label-pro">Dimension Unit</label>
+                <div class="flex rounded-md shadow-sm" role="group">
+                  <button type="button" onclick="setDimUnit('inch')" id="btnInch" class="w-1/2 px-3 py-2 text-xs font-medium border border-gray-300 rounded-l-lg bg-brand-600 text-white transition-colors duration-200">Inch</button>
+                  <button type="button" onclick="setDimUnit('mm')" id="btnMm" class="w-1/2 px-3 py-2 text-xs font-medium border border-gray-300 border-l-0 rounded-r-lg bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200">MM</button>
+                </div>
+                <input type="hidden" id="dimUnitVal" value="inch">
+             </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div>
+              <label class="label-pro text-brand-700" id="lblLen">Length</label>
+              <input id="length" type="number" step="0.01" class="input-pro border-brand-200 focus:border-brand-500" placeholder="0.00" oninput="calculatePrice()">
+            </div>
+            <div>
+              <label class="label-pro text-brand-700" id="lblWid">Width</label>
+              <input id="width" type="number" step="0.01" class="input-pro border-brand-200 focus:border-brand-500" placeholder="0.00" oninput="calculatePrice()">
+            </div>
+            <div>
+                <label class="label-pro">Bag Construction</label>
+                <select id="bagConstruction" onchange="calculatePrice()" class="input-pro">
+                  <option value="pouch" selected>Pouch (2 Sides)</option>
+                  <option value="sheet">Sheet / Roll (1 Layer)</option>
+                </select>
+            </div>
+            <div class="col-span-2 md:col-span-3">
+                <label class="label-pro">Sealing Type</label>
+                <select id="sealingType" onchange="calculatePrice()" class="input-pro">
+                  <option value="side">Side Seal / Pouch (Cut = Width)</option>
+                  <option value="bottom">Bottom Seal (Cut = Length)</option>
+                </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer Specifications -->
+        <div>
+            <div class="section-title">Layer Specifications</div>
+            <div class="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                <div class="grid grid-cols-10 gap-2 p-2 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase">
+                    <div class="col-span-3">Layer</div>
+                    <div class="col-span-2">Thick/GSM</div>
+                    <div class="col-span-2">Density</div>
+                    <div class="col-span-3">Rate (₹/Kg)</div>
+                </div>
+                
+                <!-- PET Layer -->
+                <div class="grid grid-cols-10 gap-2 p-2 items-center border-b border-slate-100">
+                    <div class="col-span-3 text-sm font-semibold text-slate-700">1. PET</div>
+                    <div class="col-span-2"><input id="petThickness" type="number" step="0.1" class="input-pro p-1 text-center h-8" placeholder="Mic" oninput="calculatePrice()"></div>
+                    <div class="col-span-2"><input id="petDensity" type="number" step="0.01" value="1.38" class="input-pro p-1 text-center h-8 bg-slate-50" oninput="calculatePrice()"></div>
+                    <div class="col-span-3"><input id="petRmCost" type="number" step="0.01" class="input-pro p-1 text-center h-8" placeholder="₹" oninput="calculatePrice()"></div>
+                </div>
+
+                <!-- Foil Layer -->
+                <div class="grid grid-cols-10 gap-2 p-2 items-center border-b border-slate-100">
+                    <div class="col-span-3 text-sm font-semibold text-slate-700">2. MET FOIL</div>
+                    <div class="col-span-2"><input id="foilThickness" type="number" step="0.1" class="input-pro p-1 text-center h-8" placeholder="Mic" oninput="calculatePrice()"></div>
+                    <div class="col-span-2"><input id="foilDensity" type="number" step="0.01" value="2.70" class="input-pro p-1 text-center h-8 bg-slate-50" oninput="calculatePrice()"></div>
+                    <div class="col-span-3"><input id="foilRmCost" type="number" step="0.01" class="input-pro p-1 text-center h-8" placeholder="₹" oninput="calculatePrice()"></div>
+                </div>
+
+                <!-- Poly Layer -->
+                <div class="grid grid-cols-10 gap-2 p-2 items-center border-b border-slate-100">
+                    <div class="col-span-3 text-sm font-semibold text-slate-700">3. POLY</div>
+                    <div class="col-span-2"><input id="polyThickness" type="number" step="0.1" class="input-pro p-1 text-center h-8" placeholder="Mic" oninput="calculatePrice()"></div>
+                    <div class="col-span-2"><input id="polyDensity" type="number" step="0.01" value="0.92" class="input-pro p-1 text-center h-8 bg-slate-50" oninput="calculatePrice()"></div>
+                    <div class="col-span-3"><input id="polyRmCost" type="number" step="0.01" class="input-pro p-1 text-center h-8" placeholder="₹" oninput="calculatePrice()"></div>
+                </div>
+
+                 <!-- Glue Layer (New) -->
+                <div class="grid grid-cols-10 gap-2 p-2 items-center border-b border-slate-200 bg-slate-50/50">
+                    <div class="col-span-3 text-sm font-semibold text-slate-600">4. ADHESIVE</div>
+                    <div class="col-span-2"><input id="glueGsm" type="number" step="0.1" value="5.0" class="input-pro p-1 text-center h-8 border-slate-200" placeholder="GSM" oninput="calculatePrice()"></div>
+                    <div class="col-span-2"><input disabled value="-" class="input-pro p-1 text-center h-8 bg-transparent border-none text-slate-400"></div>
+                    <div class="col-span-3"><input id="glueRmCost" type="number" step="0.01" value="250" class="input-pro p-1 text-center h-8 border-slate-200" placeholder="₹" oninput="calculatePrice()"></div>
+                </div>
+
+                <!-- Composite Footer -->
+                <div class="grid grid-cols-10 gap-2 p-2 bg-brand-50 items-center">
+                     <div class="col-span-3 text-right text-[10px] font-bold text-brand-700 uppercase pr-2">Composite</div>
+                     <div class="col-span-2 text-center text-xs font-bold text-slate-700" id="footerTotalMic">0.0</div>
+                     <div class="col-span-2 text-center text-[10px] text-slate-500" id="footerTotalGsm">0 GSM</div>
+                     <div class="col-span-3 relative flex flex-col gap-0.5">
+                         <div class="flex items-center justify-between px-1">
+                            <span class="text-[8px] font-bold text-slate-500 uppercase">Avg Price</span>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" id="useManualAvg" onchange="toggleManualAvg()" class="accent-brand-600 h-3 w-3" title="Manual Override">
+                                <span class="text-[8px] font-bold text-brand-600 uppercase">Man.</span>
+                            </label>
+                         </div>
+                         <input id="compositeAvgRate" type="number" step="0.01" class="input-pro p-1 text-center h-8 font-bold border-brand-200 text-brand-700 focus:ring-brand-500" placeholder="Avg" readonly oninput="calculatePrice()">
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Costing Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left: Printing & Margins -->
+            <div>
+               <div class="section-title">Printing & Operations</div>
+               
+               <div class="mb-4">
+                 <label class="label-pro">Print Mode</label>
+                 <select id="print_mode" onchange="calculatePrice()" class="input-pro">
+                   <option value="color_1000">Per Color / 1000 Pcs</option>
+                   <option value="per_kg">Per Kg of Material</option>
+                   <option value="per_pc">Per Pc (Flat Rate)</option>
+                 </select>
+               </div>
+
+               <div class="grid grid-cols-2 gap-3 mb-4">
+                 <div>
+                   <label class="label-pro">No of Colors</label>
+                   <input id="printColors" type="number" class="input-pro" placeholder="Count" oninput="calculatePrice()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Print Rate</label>
+                   <input id="costPerColor" type="number" step="0.01" class="input-pro" placeholder="Rate" oninput="calculatePrice()">
+                 </div>
+               </div>
+
+               <div class="grid grid-cols-2 gap-3 mb-4">
+                 <div>
+                   <label class="label-pro">Wastage %</label>
+                   <input id="wastage" type="number" step="0.01" class="input-pro" placeholder="%" oninput="calculatePrice()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Margin %</label>
+                   <input id="margin" type="number" step="0.01" class="input-pro" placeholder="%" oninput="calculatePrice()">
+                 </div>
+               </div>
+            </div>
+
+            <!-- Right: Extras -->
+            <div>
+               <div class="section-title">Extras</div>
+               <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                 <div>
+                   <label class="label-pro">Zipper (₹/Inch)</label>
+                   <input id="zip_cost" type="number" step="0.01" class="input-pro" oninput="calculatePrice()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Valve (₹/Pc)</label>
+                   <input id="valve_cost" type="number" step="0.01" class="input-pro" oninput="calculatePrice()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Handle (₹/Pc)</label>
+                   <input id="handle_cost" type="number" step="0.01" class="input-pro" oninput="calculatePrice()">
+                 </div>
+                 <div>
+                   <label class="label-pro">Packing (₹/Pc)</label>
+                   <input id="packing_cost" type="number" step="0.01" class="input-pro" oninput="calculatePrice()">
+                 </div>
+               </div>
+               <div class="mt-2 text-[10px] text-slate-500 italic">
+                 * Zipper cost calculated based on Cut Length.
+               </div>
+            </div>
+        </div>
+
+      </div>
+      
+      <!-- Footer Actions -->
+      <div class="bg-slate-50 p-4 border-t border-slate-200 flex gap-3">
+        <button onclick="calculatePrice()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white px-4 py-3 rounded-lg font-bold shadow-sm flex justify-center items-center gap-2 transition-colors">
+          Calculate
+        </button>
+        <button onclick="addItem()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-bold shadow-sm flex justify-center items-center gap-2 transition-colors">
+          Add to Quote
+        </button>
+        <button onclick="clearCalculator()" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-3 rounded-lg font-medium transition-all">
+          Reset
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Column: Results & Quote -->
+  <div class="lg:col-span-5 space-y-6">
+    
+    <!-- Live Results Card -->
+    <div class="bg-gray-950 text-white rounded-xl shadow-lg p-6 relative overflow-hidden no-print-section">
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500 opacity-10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-emerald-500 opacity-10 rounded-full -ml-10 -mb-10 blur-2xl"></div>
+
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Calculated Metrics</h3>
+        
+        <div class="grid grid-cols-2 gap-y-8 gap-x-4">
+            <div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Final Cost / Pc</div>
+                <div class="text-3xl font-bold text-emerald-400 dynamic-val" id="finalperpc">₹0.00</div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Total Order Cost</div>
+                <div class="text-xl font-semibold text-gray-300 dynamic-val" id="totalOrderCost">₹0.00</div>
+            </div>
+            
+            <div class="col-span-2 h-px bg-gray-800"></div>
+
+            <div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Yield (Pcs/Kg)</div>
+                <div class="text-xl font-medium dynamic-val" id="yieldVal">0.00</div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Pc Weight (g)</div>
+                <div class="text-xl font-medium text-brand-400 dynamic-val" id="pcWeight">0.00</div>
+            </div>
+
+            <div class="col-span-2 bg-gray-800/50 rounded-lg p-3 flex justify-between items-center border border-gray-700">
+                <span class="text-xs font-bold text-amber-500 uppercase tracking-wider" id="batchLabel">Composite GSM</span>
+                <span class="text-lg font-bold text-white dynamic-val" id="compositeGSM">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quote List Card -->
+    <div id="quoteCard" class="bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col min-h-[700px]">
+        <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center no-print-section">
+            <h2 class="font-bold text-slate-700">Current Quote</h2>
+            <div class="flex gap-2">
+                <button onclick="toggleCustomerFields()" class="text-xs font-medium text-brand-600 bg-white border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors">+ Client</button>
+                <button onclick="clearQuote()" class="text-xs font-medium text-red-500 hover:text-red-700 px-2 transition-colors">Clear</button>
+            </div>
+        </div>
+
+        <div class="p-6 border-b border-slate-200 bg-white">
+            <!-- Header for PDF -->
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold leading-none"><span class="plasto-color">PLASTO</span> <span class="films-color">FILMS</span></h1>
+                    <div class="text-[10px] text-slate-500 mt-2 space-y-0.5">
+                        <p>124 DSIDC Complex, Okhla Ph-1, New Delhi</p>
+                        <p>GST: 07AAMFP1187B1ZB</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-lg font-bold text-slate-700 uppercase tracking-wide">Quotation</h2>
+                    <div class="flex flex-col items-end gap-1 mt-2">
+                        <div class="text-xs text-slate-500">Ref: <span id="dispRef">N/A</span></div>
+                        <div class="text-xs text-slate-500">Date: <span id="dispDate">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill To Inputs (Hidden by default) -->
+            <div id="customerSection" class="hidden bg-slate-50 p-3 rounded border border-slate-100 mb-2 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Bill To</p>
+                <textarea id="custName" class="input-pro p-1 text-sm font-bold bg-transparent border-none w-full placeholder-gray-400" rows="1" placeholder="Customer Name"></textarea>
+                <textarea id="custAddr" class="input-pro p-1 text-xs bg-transparent border-none w-full placeholder-gray-400" rows="2" placeholder="Address / City"></textarea>
+                <input id="custGst" class="input-pro p-1 h-6 text-xs bg-transparent border-none w-full placeholder-gray-400" placeholder="GSTIN">
+            </div>
+        </div>
+
+        <!-- Output Options -->
+        <div class="px-4 py-3 border-b border-slate-100 flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase font-bold text-slate-500 bg-white no-print-section">
+            <div class="w-full text-[9px] text-slate-400 mb-1">Visibility Controls</div>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-brand-600"><input type="checkbox" id="showFinancials" onchange="refreshQuoteTable()" checked> Financials</label>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-brand-600"><input type="checkbox" id="showSpecs" onchange="refreshQuoteTable()" checked> Details</label>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-brand-600"><input type="checkbox" id="showMicron" onchange="refreshQuoteTable()" checked> Micron</label>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-brand-600"><input type="checkbox" id="showWeight" onchange="refreshQuoteTable()" checked> Pc Wt</label>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-brand-600"><input type="checkbox" id="showPerPcPrice" onchange="refreshQuoteTable()" checked> Rate/Pc</label>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-brand-600"><input type="checkbox" id="includeNotesInPdf" checked> Notes</label>
+        </div>
+
+        <!-- Table Container -->
+        <div class="flex-1 overflow-auto bg-white relative p-4">
+            <table id="quoteTable" class="w-full text-left text-xs border-collapse">
+                <thead class="text-[10px] text-slate-500 uppercase border-b border-slate-300">
+                    <!-- Dynamic Headers -->
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-600">
+                    <tr><td colspan="100%" class="text-center py-10 text-slate-400 italic">Add items to generate quote</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-slate-200 bg-white mt-auto">
+            <div id="footerFinancials" class="flex justify-end mb-4">
+                <div class="text-right w-40">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Total Estimate</span>
+                    <div class="text-xl font-bold text-slate-800" id="subtotalCell">₹0.00</div>
+                </div>
+            </div>
+            
+            <div id="notesContainer" class="space-y-3">
+                <p class="text-[10px] font-bold text-slate-700 uppercase mb-1">Notes</p>
+                <textarea id="quoteNotes" class="w-full text-[10px] p-2 border border-slate-200 rounded resize-none focus:border-brand-500 focus:ring-0 bg-transparent" placeholder="Terms...">Payment: 100% Advance & Balance Prior to dispatch.
+Delivery by 10-15 Days.
+Freight and GST Extra.</textarea>
+            </div>
+
+            <!-- Signature Block for PDF (UPDATED) -->
+            <div id="pdfFooter" class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-end">
+                 <!-- Generated Note -->
+                 <div class="text-left">
+                     <div id="timestamp" class="text-[8px] text-slate-400 mb-1"></div>
+                     <p class="text-[8px] text-slate-400">Computer generated estimate.</p>
+                 </div>
+                 
+                 <!-- Signature Area -->
+                 <div class="text-right">
+                    <div class="text-sm font-bold mb-6">Authorised Signatory</div>
+                    <div class="border-t border-slate-300 w-32 ml-auto"></div>
+                 </div>
+            </div>
+            
+            <!-- Controls (Hidden in PDF) -->
+            <div class="mt-4 flex gap-2 no-print-section">
+                 <input id="creatorInitials" type="text" class="input-pro text-xs w-20 text-center uppercase" placeholder="Initials" maxlength="3">
+                 <button id="exportPdfBtn" onclick="exportQuotePdf()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg font-bold shadow-lg transition-all flex justify-center items-center gap-2 text-xs">
+                    Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Quick Calc -->
+<div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden mb-12 p-6 no-print-section">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Quick Calculator</h3>
+    </div>
+    <div class="bg-slate-900 p-4 rounded-xl shadow-inner max-w-lg mx-auto">
+        <input type="text" id="quickDisplay" readonly class="w-full bg-slate-800 text-right text-3xl text-green-400 font-mono p-3 rounded-lg mb-4 focus:outline-none border border-slate-700 shadow-inner" value="0">
+        <div class="grid grid-cols-4 gap-2">
+            <button onclick="quickInput('C')" class="calc-btn text-red-500">C</button>
+            <button onclick="quickConvert('mm_in')" class="calc-btn sci" title="MM to Inch">mm→in</button>
+            <button onclick="quickConvert('in_mm')" class="calc-btn sci" title="Inch to MM">in→mm</button>
+            <button onclick="quickInput('/')" class="calc-btn op">÷</button>
+            
+            <button onclick="quickInput('7')" class="calc-btn">7</button>
+            <button onclick="quickInput('8')" class="calc-btn">8</button>
+            <button onclick="quickInput('9')" class="calc-btn">9</button>
+            <button onclick="quickInput('*')" class="calc-btn op">×</button>
+            
+            <button onclick="quickInput('4')" class="calc-btn">4</button>
+            <button onclick="quickInput('5')" class="calc-btn">5</button>
+            <button onclick="quickInput('6')" class="calc-btn">6</button>
+            <button onclick="quickInput('-')" class="calc-btn op">-</button>
+            
+            <button onclick="quickInput('1')" class="calc-btn">1</button>
+            <button onclick="quickInput('2')" class="calc-btn">2</button>
+            <button onclick="quickInput('3')" class="calc-btn">3</button>
+            <button onclick="quickInput('+')" class="calc-btn op">+</button>
+            
+            <button onclick="quickInput('0')" class="calc-btn col-span-2">0</button>
+            <button onclick="quickInput('.')" class="calc-btn">.</button>
+            <button onclick="quickInput('=')" class="calc-btn eq">=</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// GLOBAL HELPER FUNCTIONS
+const $ = id => document.getElementById(id);
+const getNum = v => { 
+    if(!v) return 0;
+    // Remove commas before parsing (e.g., "1,000" -> "1000")
+    let n = parseFloat(String(v).replace(/,/g, '')); 
+    return isNaN(n) ? 0 : n; 
+};
+const fmt2 = n => {
+    if(isNaN(n)) return "0.00";
+    return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+const fmt4 = n => {
+    if(isNaN(n)) return "0.0000";
+    return Number(n).toFixed(4);
+};
+const escapeHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+let quoteItems = [];
+
+// FUNCTIONS (Defined globally)
+function setDateToToday() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const str = `${year}-${month}-${day}`;
+    if($('calcDate')) $('calcDate').value = str;
+    if($('dispDate')) $('dispDate').textContent = str;
+}
+
+function setDimUnit(unit) {
+    const btnInch = $('btnInch'); const btnMm = $('btnMm'); $('dimUnitVal').value = unit;
+    if(unit === 'inch') {
+        btnInch.className = 'w-1/2 px-3 py-2 text-xs font-medium border border-gray-300 rounded-l-lg bg-brand-600 text-white';
+        btnMm.className = 'w-1/2 px-3 py-2 text-xs font-medium border border-gray-300 border-l-0 rounded-r-lg bg-white text-gray-700 hover:bg-gray-50';
+    } else {
+        btnMm.className = 'w-1/2 px-3 py-2 text-xs font-medium border border-gray-300 border-l-0 rounded-r-lg bg-brand-600 text-white';
+        btnInch.className = 'w-1/2 px-3 py-2 text-xs font-medium border border-gray-300 rounded-l-lg bg-white text-gray-700 hover:bg-gray-50';
+    }
+    updateUnitLabels(); calculatePrice();
+}
+
+function updateUnitLabels() {
+  const isInch = $('dimUnitVal').value === 'inch';
+  $('lblLen').textContent = isInch ? 'Length (In)' : 'Length (MM)';
+  $('lblWid').textContent = isInch ? 'Width (In)' : 'Width (MM)';
+}
+
+function toggleCustomerFields(){ 
+    const sec = $('customerSection');
+    sec.classList.toggle('hidden');
+    if (!sec.classList.contains('hidden')) {
+        $('custName').focus();
+    }
+}
+
+function toggleManualAvg() {
+    const isManual = $('useManualAvg').checked;
+    const inp = $('compositeAvgRate');
+    inp.readOnly = !isManual;
+    if(!isManual) {
+        inp.classList.add('border-brand-200');
+        inp.classList.remove('border-amber-400', 'bg-amber-50');
+        calculatePrice(); // Re-calculate standard avg
+    } else {
+        inp.classList.remove('border-brand-200');
+        inp.classList.add('border-amber-400', 'bg-amber-50');
+        inp.select();
+    }
+}
+
+// ------------------------------------------------------------------
+// CORE CALCULATION ENGINE
+// ------------------------------------------------------------------
+
+function calculateMetrics() {
+    // 1. Dimensions
+    const isInch = $('dimUnitVal').value === 'inch';
+    const rawLen = getNum($('length').value);
+    const rawWid = getNum($('width').value);
+    
+    // Convert to mm for Area calc
+    const lenMM = isInch ? rawLen * 25.4 : rawLen;
+    const widMM = isInch ? rawWid * 25.4 : rawWid;
+    
+    // Check if Bag or Sheet
+    const bagType = $('bagConstruction').value;
+    const sides = bagType === 'pouch' ? 2 : 1;
+    
+    // Area in m2 per Pc
+    const areaM2 = (lenMM / 1000) * (widMM / 1000) * sides;
+
+    // 2. Layers (Micron, Density, Cost)
+    const petThick = getNum($('petThickness').value);
+    const petDen = getNum($('petDensity').value);
+    const petCost = getNum($('petRmCost').value);
+
+    const foilThick = getNum($('foilThickness').value);
+    const foilDen = getNum($('foilDensity').value);
+    const foilCost = getNum($('foilRmCost').value);
+
+    const polyThick = getNum($('polyThickness').value);
+    const polyDen = getNum($('polyDensity').value);
+    const polyCost = getNum($('polyRmCost').value);
+    
+    const glueGsm = getNum($('glueGsm').value);
+    const glueCost = getNum($('glueRmCost').value);
+
+    // 3. Composite Metrics
+    // GSM = Thickness(micron) * Density(g/cm³) -- (Math check: mic * 1e-4 cm * g/cm3 / 1e-4 cm = g/m2)
+    // Formula: GSM = Sum (Micron * Density)
+    const gsmRaw = (petThick * petDen) + (foilThick * foilDen) + (polyThick * polyDen);
+    const gsmTotal = gsmRaw + glueGsm;
+    
+    const totalMic = petThick + foilThick + polyThick;
+    
+    // Pc Weight = GSM * Area (g)
+    const pcWt = gsmTotal * areaM2;
+    
+    // Calculate Weighted Avg Cost of Laminate (Including Glue)
+    // Cost Factor = Sum(Micron * Density * Rate) + (GlueGSM * GlueRate)
+    // Weight Factor = GSM Total
+    // Avg Rate = Cost Factor / Weight Factor
+    const costFactor = (petThick * petDen * petCost) + (foilThick * foilDen * foilCost) + (polyThick * polyDen * polyCost) + (glueGsm * glueCost);
+    const calculatedAvgRate = gsmTotal > 0 ? (costFactor / gsmTotal) : 0;
+
+    return { 
+        pcWt, 
+        gsm: gsmTotal, 
+        totalMic,
+        calculatedAvgRate,
+        pet: { w: (petThick*petDen*areaM2)/1000, cost: petCost },
+        foil: { w: (foilThick*foilDen*areaM2)/1000, cost: foilCost },
+        poly: { w: (polyThick*polyDen*areaM2)/1000, cost: polyCost },
+        glue: { w: (glueGsm*areaM2)/1000, cost: glueCost },
+        dim: { len: isInch?rawLen:rawLen/25.4, wid: isInch?rawWid:rawWid/25.4 }
+    };
+}
+
+// Sync Qty Fields based on Weight
+function syncQty(source) {
+    const metrics = calculateMetrics();
+    const wtPerPc = metrics.pcWt / 1000; // in Kg
+    
+    if(wtPerPc <= 0) return;
+
+    if (source === 'kg') {
+        const kg = getNum($('totalKg').value);
+        const pcs = Math.round(kg / wtPerPc);
+        $('totalPcs').value = pcs;
+    } else {
+        const pcs = getNum($('totalPcs').value);
+        const kg = (pcs * wtPerPc).toFixed(2);
+        $('totalKg').value = kg;
+    }
+    calculatePrice();
+}
+
+function calculatePrice() {
+    const m = calculateMetrics();
+    const totalPcs = getNum($('totalPcs').value);
+    const isManualAvg = $('useManualAvg').checked;
+
+    // 4. Material Costs (Per Pc)
+    // Cost = Weight(kg) * Rate(Per Kg)
+    let matCostPc = 0;
+    
+    if (isManualAvg) {
+        // Use manual rate input
+        const manualRate = getNum($('compositeAvgRate').value);
+        const totalWtKg = m.pcWt / 1000;
+        matCostPc = totalWtKg * manualRate;
+    } else {
+        // Use individual layers
+        const petCostPc = m.pet.w * m.pet.cost;
+        const foilCostPc = m.foil.w * m.foil.cost;
+        const polyCostPc = m.poly.w * m.poly.cost;
+        const glueCostPc = m.glue.w * m.glue.cost;
+        
+        matCostPc = petCostPc + foilCostPc + polyCostPc + glueCostPc;
+        
+        // Update the display field with calculated avg
+        $('compositeAvgRate').value = m.calculatedAvgRate.toFixed(2);
+    }
+
+    // 5. Printing
+    const colors = getNum($('printColors').value);
+    const rateColor = getNum($('costPerColor').value); 
+    const printMode = $('print_mode').value;
+    
+    let printCostPc = 0;
+    if(colors > 0) {
+        if(printMode === 'color_1000') {
+             // Rate is per 1000 pcs per color
+             printCostPc = (rateColor / 1000) * colors;
+        } else if (printMode === 'per_kg') {
+             // Rate is per Kg of material
+             const totalWtKg = m.pcWt / 1000;
+             printCostPc = rateColor * totalWtKg;
+        } else {
+             // Flat rate per pc
+             printCostPc = rateColor;
+        }
+    }
+
+    // 6. Extras
+    // Cut Length Logic
+    const sealing = $('sealingType').value;
+    const cutLenInch = sealing === 'bottom' ? m.dim.len : m.dim.wid;
+    
+    // Zipper is per Inch
+    const zipRate = getNum($('zip_cost').value);
+    const zipCostPc = zipRate * cutLenInch;
+    
+    // Others are Per Pc
+    const extraCostPc = zipCostPc + getNum($('valve_cost').value) + getNum($('handle_cost').value) + getNum($('packing_cost').value);
+
+    // 7. Base Cost
+    let baseCostPc = matCostPc + printCostPc + extraCostPc;
+
+    // 8. Wastage & Margin
+    const wstPct = getNum($('wastage').value);
+    const mgnPct = getNum($('margin').value);
+
+    const costWithWastage = baseCostPc + (baseCostPc * (wstPct / 100));
+    const finalPricePc = costWithWastage + (costWithWastage * (mgnPct / 100));
+
+    const totalOrderCost = finalPricePc * totalPcs;
+    const yieldVal = m.pcWt > 0 ? (1000 / m.pcWt) : 0;
+
+    // Update UI
+    if($('totalMicron')) $('totalMicron').textContent = m.totalMic.toFixed(1) + ' µ';
+    if($('footerTotalMic')) $('footerTotalMic').textContent = m.totalMic.toFixed(1);
+    
+    if($('compositeGSM')) $('compositeGSM').textContent = m.gsm.toFixed(2);
+    if($('footerTotalGsm')) $('footerTotalGsm').textContent = m.gsm.toFixed(0) + ' GSM';
+
+    if($('pcWeight')) $('pcWeight').textContent = fmt4(m.pcWt) + ' g';
+    if($('yieldVal')) $('yieldVal').textContent = fmt2(yieldVal);
+    if($('finalperpc')) $('finalperpc').textContent = '₹' + fmt4(finalPricePc);
+    if($('totalOrderCost')) $('totalOrderCost').textContent = '₹' + fmt2(totalOrderCost);
+
+    // Construct Spec String for Quote
+    let extrasStr = [];
+    if(colors > 0) extrasStr.push(`${colors}Col`);
+    if(zipRate>0) extrasStr.push("Zip");
+    if(getNum($('valve_cost').value)>0) extrasStr.push("Valve");
+    if(getNum($('handle_cost').value)>0) extrasStr.push("Hdl");
+
+    // Dynamic Layer Details - Hide Glue
+    let det = [];
+    if(getNum($('petThickness').value)>0) det.push(`PET:${$('petThickness').value}`);
+    if(getNum($('foilThickness').value)>0) det.push(`MET:${$('foilThickness').value}`);
+    if(getNum($('polyThickness').value)>0) det.push(`POLY:${$('polyThickness').value}`);
+    const detailStr = det.join(' | ');
+
+    return {
+        price: finalPricePc,
+        total: totalOrderCost,
+        wt: m.pcWt,
+        specs: {
+            dim: `${$('length').value}x${$('width').value} ${$('dimUnitVal').value === 'inch'?'"':'mm'}`,
+            details: detailStr,
+            extras: extrasStr.join(', ')
+        },
+        breakdown: {
+           gsm: m.gsm,
+           micron: m.totalMic
+        }
+    };
+}
+
+function addItem() {
+    try {
+        const desc = $('itemDesc').value.trim();
+        if(!desc) { alert('Item Description is required to add to quote.'); $('itemDesc').focus(); return; }
+        
+        const data = calculatePrice();
+        // Fallback for Qty if sync hasn't happened yet (user typed but didn't tab out)
+        if(!getNum($('totalPcs').value) && getNum($('totalKg').value)) {
+             syncQty('kg');
+        }
+        
+        const qty = getNum($('totalPcs').value);
+        
+        if(isNaN(data.price) || data.price <= 0) {
+            alert('Calculated price is zero or invalid. Please check dimensions and costs.');
+            return;
+        }
+        if(qty <= 0) {
+            alert('Please enter a valid Quantity (Pcs or Kg).');
+            return;
+        }
+        
+        quoteItems.push({ id: Date.now(), desc: desc, qty: qty, unit: 'Pcs', data: data, total: data.total });
+        refreshQuoteTable();
+        
+        // Visual feedback
+        const table = $('quoteTable');
+        table.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch(e) {
+        console.error(e);
+        alert('Error adding item: ' + e.message);
+    }
+}
+
+function clearQuote() { quoteItems = []; refreshQuoteTable(); }
+function clearCalculator() { 
+    document.querySelectorAll('#calculatorCard input').forEach(i => { if(i.type!=='checkbox' && i.type!=='date') i.value='' }); 
+    // Reset defaults
+    $('petDensity').value = '1.38';
+    $('foilDensity').value = '2.70';
+    $('polyDensity').value = '0.92';
+    $('petThickness').value = '';
+    $('foilThickness').value = '';
+    $('polyThickness').value = '';
+    $('glueGsm').value = '5.0';
+    $('print_mode').value = 'color_1000';
+    $('sealingType').value = 'side';
+    $('bagConstruction').value = 'pouch';
+    
+    // Reset Manual Mode
+    $('useManualAvg').checked = false;
+    toggleManualAvg();
+    
+    setDateToToday();
+    calculatePrice(); 
+}
+
+function delItem(i) { quoteItems.splice(i, 1); refreshQuoteTable(); }
+
+function updateRef(val) {
+    if($('dispRef')) $('dispRef').textContent = val || 'N/A';
+}
+
+function updateDate(val) {
+    if($('dispDate')) $('dispDate').textContent = val;
+}
+
+function refreshQuoteTable() {
+    const tbody = document.querySelector('#quoteTable tbody');
+    const thead = document.querySelector('#quoteTable thead');
+    const showFin = $('showFinancials').checked;
+    const footerFinancials = $('footerFinancials');
+    
+    if(showFin) footerFinancials.classList.remove('hidden'); else footerFinancials.classList.add('hidden');
+
+    let h = `<tr><th class="px-2 py-1 w-8 text-center">#</th><th class="px-2 py-1">Description</th><th class="px-2 py-1 text-center">Quantity</th><th class="px-2 py-1 text-center">Dimensions</th>`;
+    if($('showSpecs').checked) h += `<th class="px-2 py-1 text-center">Layer Details</th>`;
+    if($('showMicron').checked) h += `<th class="px-2 py-1 text-center">Total Thickness</th>`;
+    if($('showWeight').checked) h += `<th class="px-2 py-1 text-center text-amber-600">Piece Weight</th>`;
+    if($('showPerPcPrice').checked) h += `<th class="px-2 py-1 text-right text-emerald-600">Unit Price</th>`;
+    if(showFin) h += `<th class="px-2 py-1 text-right">Total Cost</th>`;
+    h += `<th class="px-2 py-1 w-8 no-print-section"></th></tr>`;
+    thead.innerHTML = h;
+    tbody.innerHTML = '';
+
+    if(!quoteItems.length) {
+        tbody.innerHTML = `<tr><td colspan="100%" class="text-center py-10 text-slate-400 italic">Add items to generate quote</td></tr>`;
+        $('subtotalCell').textContent = '₹0.00';
+        return;
+    }
+
+    let sub = 0;
+    quoteItems.forEach((item, i) => {
+        // Safety check for data integrity
+        const d = item.data || { specs: {}, breakdown: {}, price: 0, wt: 0 };
+        const safeTotal = item.total || 0;
+        
+        let descHtml = `<div class="font-bold text-slate-700">${escapeHtml(item.desc)}</div>`;
+        if(d.specs.extras) descHtml += `<div class="text-[9px] text-slate-500 mt-0.5 leading-tight">${d.specs.extras}</div>`;
+        
+        const isLast = i === quoteItems.length - 1;
+        const animClass = isLast ? 'animate-highlight' : '';
+        
+        const tr = document.createElement('tr'); 
+        tr.className = `border-b border-slate-50 hover:bg-slate-50 transition-colors compact-row ${animClass}`;
+        
+        let row = `<td class="text-center text-[10px] text-slate-400">${i+1}</td><td>${descHtml}</td><td class="text-center whitespace-nowrap font-medium text-xs">${item.qty}</td><td class="text-center text-[10px] font-mono text-slate-600">${d.specs.dim || '-'}</td>`;
+        
+        if($('showSpecs').checked) row += `<td class="text-center text-[9px] text-slate-500">${d.specs.details || '-'}</td>`;
+        if($('showMicron').checked) row += `<td class="text-center text-[10px] text-slate-600 font-bold">${d.breakdown.micron ? d.breakdown.micron.toFixed(1) : '-'}</td>`;
+        if($('showWeight').checked) row += `<td class="text-center text-[10px] text-amber-600 font-medium">${fmt4(d.wt)}g</td>`;
+        if($('showPerPcPrice').checked) row += `<td class="text-right text-[10px] text-emerald-600 font-mono">₹${fmt4(d.price)}</td>`;
+        
+        if(showFin) {
+            row += `<td class="text-right font-bold text-slate-900 text-xs">₹${fmt2(safeTotal)}</td>`;
+        }
+        
+        row += `<td class="text-center no-print-section"><button onclick="delItem(${i})" class="text-red-400 hover:text-red-600 p-0.5 del-btn" data-index="${i}">×</button></td>`;
+        tr.innerHTML = row; tbody.appendChild(tr); sub += safeTotal;
+    });
+    $('subtotalCell').textContent = '₹' + fmt2(sub);
+}
+
+function toggleSampleData() {
+    if ($('useSampleData').checked) {
+        $('itemDesc').value='Sample Pouch 12+70'; 
+        $('refNumber').value='EST-TEST'; 
+        $('length').value='180'; 
+        $('width').value='140'; 
+        setDimUnit('mm'); // Ensure MM is selected
+        
+        // Layers
+        $('petThickness').value='12';
+        $('petRmCost').value='150';
+        $('foilThickness').value='';
+        $('foilRmCost').value='';
+        $('polyThickness').value='70';
+        $('polyRmCost').value='130';
+        $('glueGsm').value = '5.0';
+
+        // Print & Process
+        $('printColors').value='';
+        $('wastage').value='0';
+        $('margin').value='0';
+        
+        // Set Qty Last to trigger sync
+        $('totalPcs').value='1';
+        
+        // Ensure Manual Mode is off
+        $('useManualAvg').checked = false;
+        toggleManualAvg();
+        
+        $('bagConstruction').value = 'pouch';
+
+        updateRef('EST-TEST');
+        syncQty('pcs'); 
+    } else {
+        clearCalculator();
+    }
+}
+
+/**
+ * Helper function to replace inputs with text divs for PDF export.
+ */
+function replaceElementWithDiv(element) {
+    const div = document.createElement('div');
+    div.className = element.className;
+    div.style.cssText = window.getComputedStyle(element).cssText;
+    
+    div.style.height = 'auto';
+    div.style.minHeight = element.style.minHeight || '1.2em';
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.overflow = 'visible';
+    div.style.border = 'none';
+    div.style.background = 'transparent';
+    div.style.padding = '0';
+    div.style.fontWeight = 'bold';
+    
+    div.textContent = element.value;
+    div.dataset.isReplacement = "true";
+    
+    if(element.parentNode) {
+        element.parentNode.insertBefore(div, element);
+        element.style.display = 'none';
+    }
+    return { element, div };
+}
+
+// PDF Export Logic
+function exportQuotePdf() {
+    if(!quoteItems.length) return alert('No items to export. Please add items to the quote.');
+    
+    document.body.classList.add('pdf-export-mode');
+
+    if(!$('includeNotesInPdf').checked) {
+        if($('notesContainer')) $('notesContainer').style.display='none';
+    }
+    
+    const now = new Date();
+    const initials = $('creatorInitials').value.toUpperCase().trim() || 'SYS';
+    
+    if($('timestamp')) $('timestamp').textContent = `Prepared by: ${initials} | Generated: ${now.toLocaleString()}`;
+
+    const replacements = [];
+    const textareas = document.querySelectorAll('#quoteCard textarea');
+    textareas.forEach(ta => {
+        replacements.push(replaceElementWithDiv(ta));
+    });
+
+    const element = document.querySelector('#quoteCard'); 
+    
+    const opt = {
+      margin:       [0.3, 0.3, 0.3, 0.3],
+      filename:     `Quote_${$('refNumber').value || 'Draft'}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: 'avoid-all' }
+    };
+
+    window.scrollTo(0,0);
+
+    new Promise(resolve => setTimeout(resolve, 500))
+        .then(() => {
+            return html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                const pageSize = pdf.internal.pageSize;
+                const pageWidth = pageSize.getWidth();
+                const pageHeight = pageSize.getHeight();
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(150);
+                    const text = `Page ${i} of ${totalPages}`;
+                    pdf.text(text, pageWidth - 0.5, pageHeight - 0.5, { align: 'right' });
+                }
+            }).save();
+        })
+        .then(() => {
+            cleanupPdfMode(replacements);
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error generating PDF');
+            cleanupPdfMode(replacements);
+        });
+}
+
+function cleanupPdfMode(replacements) {
+    document.body.classList.remove('pdf-export-mode');
+    
+    if($('notesContainer')) $('notesContainer').style.display='';
+    
+    if(replacements) {
+        replacements.forEach(rep => {
+            if(rep.div.parentNode) rep.div.parentNode.removeChild(rep.div);
+            rep.element.style.display = '';
+        });
+    }
+}
+
+// Quick Calc
+let qExp = '';
+function quickInput(v) { const d=$('quickDisplay'); if(v==='C'){qExp=''; d.value='0';} else if(v==='='){try{d.value=eval(qExp); qExp=d.value;}catch{d.value='Err';qExp='';}} else {if(qExp==='0' && !['+','-','*','/'].includes(v))qExp=''; qExp+=v; d.value=qExp;} }
+function quickConvert(t) { const d=$('quickDisplay'); let v=parseFloat(d.value); if(isNaN(v))return; d.value = Number((t==='mm_in'?v/25.4:v*25.4).toFixed(4)); qExp=d.value; }
+
+// STARTUP
+document.addEventListener('DOMContentLoaded', () => {
+    $('useSampleData').onchange = toggleSampleData;
+    setDateToToday();
+    toggleSampleData();
+});
+</script>
+</body>
+</html>

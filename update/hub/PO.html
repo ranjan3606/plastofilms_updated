@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purchase Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000;
+            --accent-color: #2c3e50;
+            --border-color: #ccc;
+            --table-border-color: var(--text-color);
+            --button-hover-bg: #1a252f;
+            --input-bg-color: #ffffff;
+            --note-text-color: #555;
+        }
+
+        /* Dark theme styles */
+        body.dark {
+            --bg-color: #1f1f1f;
+            --text-color: #f0f0f0;
+            --accent-color: #3498db;
+            --border-color: #555;
+            --table-border-color: #f0f0f0;
+            --button-hover-bg: #2980b9;
+            --input-bg-color: #333;
+            --note-text-color: #bbb;
+        }
+
+        /* General body styling */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Invoice container styling */
+        .invoice {
+            max-width: 900px;
+            margin: auto;
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Header section styling */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+            flex-grow: 1;
+        }
+
+        .header img {
+            height: 70px;
+            width: auto;
+            background-color: #fff;
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .header h1 {
+            text-align: left;
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 2em;
+            white-space: nowrap;
+        }
+
+        .ref-section {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-left: 20px;
+        }
+
+        .ref-section p {
+            margin: 5px 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ref-section strong {
+            white-space: nowrap;
+        }
+
+        /* Input, select, and textarea styling */
+        input, select, textarea {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .ref-section input[type="text"],
+        .ref-section input[type="date"] {
+            width: 150px;
+            text-align: left;
+            margin: 0;
+        }
+
+        /* TIGHTER TEXTAREA STYLING */
+        textarea {
+            resize: none; 
+            overflow: hidden; 
+            line-height: 1.4;
+            min-height: 38px; /* Force it to look exactly like an input field initially */
+            height: 38px;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid var(--table-border-color);
+            padding: 5px; /* Compact padding */
+            text-align: center;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            padding: 10px;
+        }
+
+        /* Specific style for header rows in the table */
+        .table-header-row td {
+            text-align: left;
+            padding-left: 10px;
+            background-color: rgba(var(--accent-color-rgb, 44, 62, 80), 0.03);
+            font-weight: bold;
+        }
+        
+        /* Section Header Input Styling (now textarea) */
+        .section-header-input {
+            width: 100%;
+            font-weight: bold;
+            text-align: left;
+            border: none;
+            background: transparent;
+            padding: 5px 0;
+            min-height: 30px;
+        }
+        .section-header-input:focus {
+            outline: none;
+            border-bottom: 1px solid var(--accent-color);
+        }
+
+        /* Unit select size */
+        td select.unitSelect {
+            width: 100%;
+            padding: 6px;
+            font-size: 0.95em;
+            margin: 0;
+        }
+
+        /* Description Textarea specific styling - looks like a cell */
+        td textarea.desc {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid transparent; 
+            background: transparent;
+            text-align: left;
+            padding: 8px 4px;
+            margin: 0;
+        }
+        
+        td textarea.desc:focus {
+            border-color: var(--accent-color);
+            background-color: var(--input-bg-color);
+        }
+
+        /* Ensure number inputs in table take full width */
+        td input[type="number"], td input[type="text"] {
+             width: 100%;
+             margin: 0;
+             padding: 6px;
+        }
+
+        /* Section spacing */
+        .section {
+            margin-top: 15px; 
+        }
+
+        .section h2 {
+            color: var(--accent-color);
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+        
+        /* Address Select Styling */
+        #companyAddress {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            font-size: 1em;
+            cursor: pointer;
+            white-space: normal; /* Allow text wrapping in some browsers */
+            height: auto;
+        }
+
+        /* Action buttons styling */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* New container for the download and reset buttons */
+        .bottom-buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button, .bottom-buttons-container button, .theme-toggle button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 18px; 
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-buttons button:hover, .bottom-buttons-container button:hover, .theme-toggle button:hover {
+            background: var(--button-hover-bg);
+        }
+
+        /* Delete button specific style */
+        table button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.2s ease;
+            margin-top: 2px;
+        }
+
+        table button:hover {
+            background-color: #c0392b;
+        }
+
+        /* Terms section */
+        .terms-section {
+            margin-top: 20px;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            text-align: left;
+        }
+
+        /* Note section styling */
+        .note-section {
+            margin-top: 20px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .note-section strong, .terms-section strong {
+            color: var(--accent-color);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Specific fix for Note Textarea to be compact */
+        .note-section textarea, .terms-section textarea {
+            width: 100%;
+            color: var(--note-text-color);
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            min-height: 38px; /* Force small start */
+        }
+
+        .payment-terms-content {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Totals Summary Section Styling */
+        .summary-totals {
+            display: grid;
+            grid-template-columns: 1fr auto 150px;
+            align-items: center;
+            gap: 5px 10px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .summary-totals .label {
+            text-align: right;
+            font-weight: bold;
+            padding-right: 10px;
+            grid-column: 2 / 3;
+        }
+
+        .summary-totals .value {
+            grid-column: 3 / 4;
+        }
+
+        .summary-totals .value input[type="number"],
+        .summary-totals .value input[type="text"] {
+            width: 100%;
+            text-align: left;
+            padding: 5px;
+            margin: 0;
+        }
+
+        .summary-totals .value input[type="checkbox"] {
+            width: auto;
+            margin-left: 5px;
+        }
+
+        .summary-totals .grand-total-label,
+        .summary-totals .grand-total-value input {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--accent-color);
+        }
+        .summary-totals .grand-total-value input {
+            border-color: var(--accent-color);
+        }
+
+        /* Info Bottom Section */
+        .info-bottom-section-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 20px;
+            gap: 30px;
+        }
+
+        .info-bottom-section-container .terms-section,
+        .info-bottom-section-container .note-section {
+            flex: 1;
+            min-width: 0;
+            margin-top: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .plasto-color { color: #E74C3C; }
+        .films-color { color: #3498DB; }
+
+        .company-signature-footer {
+            text-align: right;
+            margin-top: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .computer-generated-note {
+            text-align: center;
+            font-size: 0.85em;
+            margin-top: 40px;
+            color: var(--note-text-color);
+        }
+
+        /* Container for the Initials Input */
+        .initials-container {
+            text-align: right;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .pdf-options {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            margin-left: 15px;
+        }
+
+        .pdf-options input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            vertical-align: middle;
+        }
+
+        /* --- PDF Export Mode Specific Styles --- */
+        body.pdf-export-mode .action-buttons,
+        body.pdf-export-mode .theme-toggle,
+        body.pdf-export-mode .bottom-buttons-container {
+            display: none !important;
+        }
+
+        /* Clean look for PDF */
+        body.pdf-export-mode input:not([readonly]):not([type="date"]),
+        body.pdf-export-mode textarea,
+        body.pdf-export-mode select:not(#companyAddress) { /* Exclude address select as it gets replaced */
+            border: none !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            outline: none !important;
+            color: var(--text-color) !important;
+            resize: none !important; 
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body.pdf-export-mode input[readonly] {
+            border: none !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            color: var(--text-color) !important;
+        }
+
+        body.pdf-export-mode th:last-child,
+        body.pdf-export-mode td:last-child {
+            display: none !important;
+        }
+
+        body.pdf-export-mode .summary-totals .value input {
+            border: 1px solid var(--border-color) !important;
+            padding: 5px !important;
+        }
+        body.pdf-export-mode .summary-totals .grand-total-value input {
+            border: 1px solid var(--accent-color) !important;
+        }
+
+        /* Center numbers in PDF */
+        body.pdf-export-mode td input[type="text"],
+        body.pdf-export-mode td input[type="number"],
+        body.pdf-export-mode td select {
+            text-align: center !important;
+        }
+        
+        /* Ensure description aligns left in PDF */
+        body.pdf-export-mode td textarea.desc {
+            text-align: left !important;
+            padding: 2px !important;
+        }
+        
+        body.pdf-export-mode .section-header-input {
+             border-bottom: 1px solid transparent;
+             padding: 2px 0;
+        }
+
+        /* Select styling in PDF (remove arrow) */
+        body.pdf-export-mode select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-align-last: center;
+        }
+
+        body.pdf-export-mode {
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .pdf-export-mode .pdf-hide-element {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="theme-toggle">
+        <button onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <div id="invoice" class="invoice">
+        <div class="header">
+            <div class="header-left">
+                <img src="images/img-01.png" alt="Plasto Films Logo" onerror="this.style.display='none'">
+                <h1>Purchase Order</h1>
+            </div>
+            <div class="ref-section">
+                <p><strong>PO No.:</strong> <input type="text" id="referenceNumber" placeholder="001"/></p>
+                <p><strong>Date:</strong> <input type="date" id="invoiceDate" /></p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Plasto Films (Buyer)</h2>
+            <!-- Address Dropdown -->
+            <select id="companyAddress">
+                <option value="Unit 1: 124, DSIDC Shed, Okhla Phase I, Okhla Industrial Area, New Delhi, Delhi 110020.">Unit 1: 124, DSIDC Shed, Okhla Phase I, Okhla Industrial Area, New Delhi, Delhi 110020.</option>
+                <option value="UNIT2- 120, Ground Floor, Basement, DSIDC Shed, Okhla Phase I, Okhla Industrial Area, New Delhi, Delhi 110020.">UNIT2- 120, Ground Floor, Basement, DSIDC Shed, Okhla Phase I, Okhla Industrial Area, New Delhi, Delhi 110020.</option>
+                <option value="UNIT 3: 120, Third Floor, DSIDC Shed, Okhla Phase I, Okhla Industrial Area, New Delhi, Delhi 110020.">UNIT 3: 120, Third Floor, DSIDC Shed, Okhla Phase I, Okhla Industrial Area, New Delhi, Delhi 110020.</option>
+            </select>
+            <p><strong>GSTIN:</strong> 07AAMFP1187B1ZB</p>
+        </div>
+
+        <div class="section">
+            <label for="billTo">To (Vendor):</label>
+            <!-- ROWS set to 1 to ensure compact start -->
+            <textarea rows="1" id="billTo" placeholder="Vendor Name and Address" oninput="autoResize(this)"></textarea>
+            <label for="gstRegistrationNo">Vendor GSTIN:</label>
+            <input type="text" id="gstRegistrationNo" placeholder="Vendor's GST Number" />
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 38%;">Description</th>
+                    <th id="qtyHeader" style="width: 12%;">Qty</th>
+                    <th style="width: 10%;">Unit</th> 
+                    <th id="rateHeader" style="width: 15%;">Rate</th>
+                    <th style="width: 15%;">Total (₹)</th>
+                    <th style="width: 10%;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="itemTable">
+            </tbody>
+        </table>
+
+        <div class="action-buttons">
+            <button onclick="addRow()">+ Add Item</button>
+            <button onclick="addHeaderRow()">+ Add Header</button>
+        </div>
+
+        <div class="summary-totals">
+            <!-- Freight -->
+            <div></div> <div class="label">Freight</div> <div class="value"><input type="number" id="freight" placeholder="0.00" oninput="updateTotals()" /></div>
+
+            <!-- Sub Total -->
+            <div></div>
+            <div class="label">Sub Total</div>
+            <div class="value"><input type="text" id="subTotal" readonly /></div>
+            
+            <!-- IGST -->
+            <div></div>
+            <div class="label">IGST @18%</div>
+            <div class="value"><input type="text" id="igst" readonly /></div>
+            
+            <!-- Total -->
+            <div></div>
+            <div class="label grand-total-label">Total</div>
+            <div class="value grand-total-value"><input type="text" id="grandTotal" readonly /></div>
+            
+            <!-- "If Advance is Received" Checkbox -->
+            <div id="showAdvanceContainer" style="display: contents;">
+                <div></div>
+                <div class="label"><label for="showAdvance">Include Advance Paid</label></div>
+                <div class="value"><input type="checkbox" id="showAdvance" onchange="toggleAdvanceVisibility()"></div>
+            </div>
+
+            <!-- Advance Field -->
+            <div id="advanceRow" style="display: contents;">
+                <div></div>
+                <div class="label">Advance Paid</div>
+                <div class="value"><input type="number" id="advance" placeholder="0.00" oninput="updateTotals()" /></div>
+            </div>
+
+            <!-- Balance Due Field -->
+            <div id="balanceDueRow" style="display: contents;">
+                <div></div>
+                <div class="label grand-total-label">Balance to Pay</div>
+                <div class="value grand-total-value"><input type="text" id="balanceDue" readonly /></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <label for="paymentTerms">Payment Terms:</label>
+            <textarea rows="1" id="paymentTerms" class="payment-terms-content" oninput="autoResize(this)">Payment within 30 days of receipt of material</textarea>
+        </div>
+
+        <div class="info-bottom-section-container">
+            <div class="terms-section">
+                <strong>Terms & Conditions / Shipping:</strong>
+                <textarea rows="1" id="termsContent" oninput="autoResize(this)">Please deliver to the address mentioned above.
+Notify 24 hours prior to dispatch.
+Include Packing Slip with shipment.</textarea>
+            </div>
+
+            <div class="note-section">
+                <strong>Note:</strong>
+                <!-- ROWS set to 1 for compact initial state -->
+                <textarea rows="1" id="notesContent" oninput="autoResize(this)">Final Quantity may vary by +/- 5%
+Subject to Delhi Jurisdiction.</textarea>
+            </div>
+        </div>
+
+        <p class="company-signature-footer"><strong>For <span class="plasto-color">Plasto</span> <span class="films-color">Films</span></strong></p>
+        
+        <!-- Creator Initials Input (Visible in UI, used for PDF footer) -->
+        <div class="initials-container pdf-hide-element">
+            <label for="creatorInitials"><strong>Prepared by (Initials):</strong></label>
+            <input type="text" id="creatorInitials" placeholder="XX" style="width: 60px; display: inline-block; padding: 4px; text-transform: uppercase;">
+        </div>
+
+        <p class="computer-generated-note">Computer generated Purchase Order, no signature required.</p>
+    </div>
+
+    <div class="bottom-buttons-container">
+        <button onclick="downloadPDF()">Download PDF</button>
+        <button onclick="resetForm()">Reset</button>
+        <div class="pdf-options">
+            <label><input type="checkbox" id="hideAdvanceInPdf"> Hide Advance in PDF</label>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Automatically resizes a textarea based on its content content.
+         */
+        function autoResize(textarea) {
+            textarea.style.height = 'auto'; // Reset height
+            textarea.style.height = (textarea.scrollHeight) + 'px'; // Set to content height
+        }
+
+        /**
+         * Formats a number to INR currency standard with commas (Indian numbering system).
+         */
+        function formatINR(num) {
+            if (isNaN(num)) return "0.00";
+            let x = num.toFixed(2);
+            let parts = x.split('.');
+            let integerPart = parts[0];
+            let decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+
+            let lastThree = integerPart.substring(integerPart.length - 3);
+            let otherNumbers = integerPart.substring(0, integerPart.length - 3);
+            if (otherNumbers != '') {
+                lastThree = ',' + lastThree;
+            }
+            let res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+            return res + decimalPart;
+        }
+        
+        function toggleAdvanceVisibility() {
+            const show = document.getElementById('showAdvance').checked;
+            const advanceRow = document.getElementById('advanceRow');
+            const balanceDueRow = document.getElementById('balanceDueRow');
+
+            if (show) {
+                advanceRow.style.display = 'contents';
+                balanceDueRow.style.display = 'contents';
+            } else {
+                advanceRow.style.display = 'none';
+                balanceDueRow.style.display = 'none';
+                document.getElementById('advance').value = '';
+                updateTotals();
+            }
+        }
+
+        function updateTotals() {
+            let subtotal = 0;
+            document.querySelectorAll("#itemTable tr.item-row").forEach(row => {
+                const qtyInput = row.querySelector(".qty");
+                const rateInput = row.querySelector(".rate");
+                const totalInput = row.querySelector(".total");
+
+                const qty = parseFloat(qtyInput?.value) || 0;
+                const rate = parseFloat(rateInput?.value) || 0;
+                const total = qty * rate;
+
+                if (totalInput) {
+                    // Only update total input if we have valid numbers, otherwise keep 0.00
+                    // But if Qty/Rate are empty strings, total is 0.
+                    totalInput.value = formatINR(total);
+                    totalInput.dataset.rawValue = total;
+                }
+                subtotal += total;
+            });
+
+            const freight = parseFloat(document.getElementById('freight').value) || 0;
+            const totalWithFreight = subtotal + freight;
+            const igst = totalWithFreight * 0.18;
+            const grandTotal = totalWithFreight + igst;
+            const advance = parseFloat(document.getElementById('advance').value) || 0;
+            const balanceDue = grandTotal - advance;
+
+            document.getElementById('subTotal').value = formatINR(totalWithFreight);
+            document.getElementById('igst').value = formatINR(igst);
+            document.getElementById('grandTotal').value = formatINR(grandTotal);
+            document.getElementById('balanceDue').value = formatINR(balanceDue);
+        }
+
+        /**
+         * Updates the Qty and Rate headers based on the selected units in the rows.
+         */
+        function updateHeaders() {
+            const units = Array.from(document.querySelectorAll('.unitSelect')).map(s => s.value);
+            const qtyHeader = document.getElementById('qtyHeader');
+            const rateHeader = document.getElementById('rateHeader');
+
+            // Check if there are units and if all units are the same
+            if (units.length > 0 && units.every(u => u === units[0])) {
+                const unit = units[0];
+                qtyHeader.innerText = `Qty (${unit})`;
+                rateHeader.innerText = `Rate (₹/${unit})`;
+            } else {
+                qtyHeader.innerText = `Qty`;
+                rateHeader.innerText = `Rate`;
+            }
+        }
+
+        /**
+         * Adds a new item row to the invoice table.
+         * Default unit is Kg. Input values are empty.
+         */
+        function addRow() {
+            const row = document.createElement("tr");
+            row.className = "item-row";
+            row.innerHTML = `
+                <td>
+                    <textarea class="desc" placeholder="Item Description" oninput="autoResize(this)" rows="1"></textarea>
+                </td>
+                <td><input type="number" class="qty" placeholder="0" oninput="updateTotals()" /></td>
+                <td>
+                    <select class="unitSelect" onchange="updateHeaders()">
+                        <option value="Kg">Kg</option>
+                        <option value="Pc">Pc</option>
+                    </select>
+                </td>
+                <td><input type="number" class="rate" placeholder="0.00" oninput="updateTotals()" /></td>
+                <td><input type="text" class="total" value="0.00" readonly /></td>
+                <td class="action-cell"><button onclick="this.closest('tr').remove(); updateTotals(); updateHeaders();">Delete</button></td>
+            `;
+            document.getElementById("itemTable").appendChild(row);
+            updateTotals();
+            updateHeaders(); 
+            // Initial resize
+            const newTextarea = row.querySelector('textarea');
+            autoResize(newTextarea); 
+        }
+
+        function addHeaderRow() {
+            const row = document.createElement("tr");
+            row.className = "table-header-row";
+            // Uses Textarea now for "same logic"
+            row.innerHTML = `
+                <td colspan="5">
+                    <textarea placeholder="Section Header" class="section-header-input" rows="1" oninput="autoResize(this)"></textarea>
+                </td>
+                <td class="action-cell"><button onclick="this.closest('tr').remove();">Delete</button></td>
+            `;
+            document.getElementById("itemTable").appendChild(row);
+        }
+
+        function resetForm() {
+            document.querySelectorAll('input, textarea, select').forEach(el => {
+                if (el.type === 'number') {
+                    // Reset to empty for easy typing
+                    el.value = '';
+                } else if (el.tagName === 'TEXTAREA') {
+                   // Reset Textareas
+                   if(el.id === 'paymentTerms') {
+                        el.value = 'Payment within 45 days of receipt of material';
+                   } else if (el.id === 'notesContent') {
+                        el.value = `Final Quantity may vary by +/- 5%\nSubject to Delhi Jurisdiction.`;
+                   } else if (el.id === 'termsContent') {
+                        el.value = `Please deliver to the address mentioned above.\nNotify 24 hours prior to dispatch.\nInclude Packing Slip with shipment.`;
+                   } else if (el.classList.contains('section-header-input') || el.classList.contains('desc')) {
+                        // Section Headers and Descriptions should be cleared if reset (or just removed if the row is removed)
+                        el.value = '';
+                   } else {
+                       el.value = '';
+                   }
+                   autoResize(el); // Reset height
+                }
+                else if (el.tagName === 'SELECT') {
+                    el.selectedIndex = 0;
+                }
+                else if (el.type !== 'checkbox') {
+                    el.value = '';
+                }
+            });
+            document.getElementById('showAdvance').checked = false;
+            document.getElementById('hideAdvanceInPdf').checked = false;
+            // Clear initials input
+            document.getElementById('creatorInitials').value = '';
+            
+            toggleAdvanceVisibility();
+            
+            document.getElementById("itemTable").innerHTML = '';
+            addRow();
+            
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            document.getElementById("invoiceDate").value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        /**
+         * Replaces textarea or select with a div containing the text to ensure PDF renders all lines without scrollbars.
+         */
+        function replaceElementWithDiv(element, textOverride = null) {
+            const div = document.createElement('div');
+            div.className = element.className;
+            div.style.cssText = window.getComputedStyle(element).cssText;
+            div.style.height = 'auto'; // Allow full expansion
+            div.style.minHeight = element.style.minHeight;
+            div.style.whiteSpace = 'pre-wrap';
+            div.style.overflow = 'visible';
+            div.style.border = 'none'; // Clean look
+            div.style.resize = 'none';
+            div.style.padding = '5px 0'; // specific adjustment for address select look
+            div.textContent = textOverride !== null ? textOverride : element.value;
+            
+            // If replacing select, match the font styling more closely to normal text
+            if(element.tagName === 'SELECT') {
+                div.style.border = 'none';
+                div.style.appearance = 'none';
+                div.style.backgroundColor = 'transparent';
+                div.style.paddingLeft = '0';
+            }
+            
+            // Mark as temporary
+            div.dataset.isReplacement = "true";
+            
+            element.parentNode.insertBefore(div, element);
+            element.style.display = 'none';
+            return { element, div };
+        }
+
+        function downloadPDF() {
+            const referenceNumber = document.getElementById("referenceNumber").value.trim().replace(/\s+/g, "_") || "PO";
+            const elementToCapture = document.body;
+
+            // 1. Prepare Textareas for PDF (Ensure all content is visible)
+            const textareas = document.querySelectorAll('textarea');
+            const replacements = [];
+            textareas.forEach(ta => {
+                replacements.push(replaceElementWithDiv(ta));
+            });
+
+            // 2. Prepare Address Select for PDF (Replace dropdown with wrapped text)
+            const addressSelect = document.getElementById('companyAddress');
+            if(addressSelect) {
+                const selectedText = addressSelect.options[addressSelect.selectedIndex].text;
+                replacements.push(replaceElementWithDiv(addressSelect, selectedText));
+            }
+
+            // 3. Handle Hiding Advance
+            const hideAdvanceInPdfChecked = document.getElementById('hideAdvanceInPdf').checked;
+            const showAdvanceContainer = document.getElementById('showAdvanceContainer');
+            const advanceRow = document.getElementById('advanceRow');
+            const balanceDueRow = document.getElementById('balanceDueRow');
+
+            if (hideAdvanceInPdfChecked) {
+                if (showAdvanceContainer) showAdvanceContainer.classList.add('pdf-hide-element');
+                if (advanceRow) advanceRow.classList.add('pdf-hide-element');
+                if (balanceDueRow) balanceDueRow.classList.add('pdf-hide-element');
+            }
+
+            // 4. Add Generation Timestamp with User Initials
+            const timestampDiv = document.createElement('div');
+            timestampDiv.style.textAlign = 'center';
+            timestampDiv.style.fontSize = '0.8em';
+            timestampDiv.style.color = '#777';
+            timestampDiv.style.marginTop = '20px';
+            
+            const initialsInput = document.getElementById('creatorInitials');
+            const userInitials = initialsInput.value.toUpperCase().trim() || 'Unknown';
+            
+            timestampDiv.innerText = `Generated by: ${userInitials} | ${new Date().toLocaleString()}`;
+            
+            document.getElementById('invoice').appendChild(timestampDiv);
+
+            document.body.classList.add('pdf-export-mode');
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+
+            new Promise(resolve => setTimeout(resolve, 500))
+                .then(() => {
+                    return html2pdf().from(elementToCapture).set({
+                        margin: [0.3, 0.3, 0.3, 0.3],
+                        filename: `${referenceNumber}.pdf`,
+                        image: { type: "jpeg", quality: 0.98 },
+                        html2canvas: {
+                            scale: 2,
+                            useCORS: true,
+                            allowTaint: true,
+                            logging: false,
+                        },
+                        jsPDF: {
+                            unit: "in",
+                            format: 'a4',
+                            orientation: "portrait",
+                        },
+                        pagebreak: { mode: 'avoid-all' }
+                    }).toPdf().get('pdf').then(function(pdf) {
+                        const totalPages = pdf.internal.getNumberOfPages();
+                        for (let i = 1; i <= totalPages; i++) {
+                            pdf.setPage(i);
+                            pdf.setFontSize(10);
+                            pdf.setTextColor(150);
+                            pdf.text(`Page ${i} of ${totalPages}`, pdf.internal.pageSize.getWidth() - 1, pdf.internal.pageSize.getHeight() - 0.5, { align: 'right' });
+                        }
+                        pdf.save(`${referenceNumber}.pdf`);
+                    });
+                }).finally(() => {
+                    // Cleanup
+                    document.body.classList.remove('pdf-export-mode');
+                    document.body.style.overflow = '';
+                    timestampDiv.remove(); // Remove the timestamp
+                    
+                    // Restore Textareas and Selects
+                    replacements.forEach(rep => {
+                        rep.div.remove();
+                        rep.element.style.display = '';
+                        if(rep.element.tagName === 'TEXTAREA') {
+                            autoResize(rep.element); // Ensure they fit nicely again
+                        }
+                    });
+
+                    if (hideAdvanceInPdfChecked) {
+                        if (showAdvanceContainer) showAdvanceContainer.classList.remove('pdf-hide-element');
+                        if (advanceRow) advanceRow.classList.remove('pdf-hide-element');
+                        if (balanceDueRow) balanceDueRow.classList.remove('pdf-hide-element');
+                    }
+                });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            if (document.body.classList.contains("dark")) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); 
+            const yyyy = today.getFullYear();
+            document.getElementById("invoiceDate").value = `${yyyy}-${mm}-${dd}`;
+            
+            toggleAdvanceVisibility();
+            addRow();
+            
+            // Auto-resize initial textareas
+            document.querySelectorAll('textarea').forEach(ta => autoResize(ta));
+        };
+    </script>
+</body>
+</html>
