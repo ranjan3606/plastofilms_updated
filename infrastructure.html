@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore Plastofilms' state-of-the-art manufacturing infrastructure. Equipped with advanced multilayer extrusion plants, high-precision printing machinery, and stringent quality control facilities.">
+    
+    <title>Infrastructure | Plasto Films</title>
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .infra-hero {
+            background: linear-gradient(100deg, rgba(5, 16, 37, 0.94), rgba(8, 26, 59, 0.75)), url('assets/images/banner1.webp') center/cover no-repeat;
+            padding: 9rem 0 6.5rem;
+            text-align: center;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .infra-hero-title {
+            font-size: clamp(2.7rem, 5vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: #fff;
+            letter-spacing: -0.055em;
+        }
+        .infra-hero-title span {
+            color: #CD1D24;
+        }
+        .infra-hero-desc {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .infra-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: .55rem;
+            margin-bottom: 1.2rem;
+            font-size: .75rem;
+            font-weight: 800;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: #dbeafe;
+        }
+        .infra-eyebrow::before { content: ''; width: 28px; height: 2px; background: #d9252c; }
+        
+        .infra-intro {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto 4rem auto;
+        }
+        .infra-intro p {
+            font-size: 1.15rem;
+            color: #475569;
+            line-height: 1.8;
+        }
+
+        .infra-features {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .infra-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(11, 23, 48, 0.08);
+            border: 1px solid #e5ebf4;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .infra-row:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 26px 55px rgba(11,23,48,.13);
+        }
+
+        .infra-row.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .infra-image {
+            flex: 1;
+            min-width: 300px;
+            height: 370px;
+            background-color: #f1f5f9;
+            position: relative;
+        }
+        
+        .infra-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Fallback gradient if image not loaded properly */
+        .infra-image::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, rgba(10, 22, 48, 0.16), rgba(217,37,44,0.08));
+            z-index: 1;
+        }
+
+        .infra-content {
+            flex: 1;
+            min-width: 300px;
+            padding: clamp(2.2rem, 5vw, 4rem);
+        }
+
+        .infra-subtitle {
+            color: #d9252c;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .infra-content h3 {
+            font-size: clamp(1.75rem, 3vw, 2.35rem);
+            color: #0b1730;
+            letter-spacing: -0.045em;
+            margin-bottom: 1rem;
+        }
+
+        .infra-content p {
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        .stats-banner {
+            background: linear-gradient(115deg, #07142e, #103469);
+            color: white;
+            padding: 4rem 0;
+            margin-top: 0;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 2rem;
+            text-align: center;
+        }
+        .stat-box h4 {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+        .stat-box p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #afc4e5;
+        }
+
+        @media (max-width: 768px) {
+            .infra-row {
+                flex-direction: column;
+            }
+            .infra-row.reverse {
+                flex-direction: column;
+            }
+            .infra-image {
+                height: 250px;
+                width: 100%;
+            }
+            .infra-content {
+                padding: 2rem;
+            }
+            .infra-hero-title {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="index.html" class="logo-container">
+                    <img src="assets/images/logo_white.png" alt="Plastofilms Logo" class="logo-img">
+                </a>
+                <div class="menu-toggle" id="mobile-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="product.html" class="nav-link">Product</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="infrastructure.html" class="nav-link active">Infrastructure</a></li>
+                    <li><a href="certifications.html" class="nav-link">Our Certifications</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="infra-hero">
+            <div class="container">
+                <p class="infra-eyebrow">Engineering reliable packaging</p>
+                <h1 class="infra-hero-title">Top-Class <span>Infrastructure</span></h1>
+                <p class="infra-hero-desc">State-of-the-art manufacturing facilities designed for precision, scale, and uncompromising quality in flexible packaging.</p>
+            </div>
+        </section>
+
+        <!-- MAIN INFRASTRUCTURE CONTENT -->
+        <section class="section" style="background-color: #f8fafc;">
+            <div class="container">
+                
+                <div class="infra-intro">
+                    <h2 class="about-title">The Power Behind Our Products</h2>
+                    <div class="title-underline" style="margin: 0 auto 2rem auto;"></div>
+                    <p>At Plasto Films, our manufacturing infrastructure is the backbone of our commitment to excellence. Housed in the Okhla Industrial Area, New Delhi, our facilities are equipped with the latest technology in polymer processing. With over three decades of experience, we have continuously upgraded our machinery to ensure we meet and exceed global packaging standards.</p>
+                </div>
+
+                <div class="infra-features">
+                    <!-- Feature 1 -->
+                    <div class="infra-row">
+                        <div class="infra-image">
+                            <img src="assets/images/infrastructure/extrusion.png" alt="Extrusion Plants">
+                        </div>
+                        <div class="infra-content">
+                            <div class="infra-subtitle">Core Production</div>
+                            <h3>Advanced Extrusion Technology</h3>
+                            <p>Equipped with cutting-edge multilayer extrusion plants, we produce films with superior strength, barrier properties, and unparalleled consistency. Our high-capacity extrusion lines allow us to manufacture custom blends tailored to highly specialized packaging requirements across diverse industries, from industrial heavy-duty films to food-grade materials.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="infra-row reverse">
+                        <div class="infra-image">
+                            <img src="assets/images/infrastructure/printing.png" alt="Printing Machinery">
+                        </div>
+                        <div class="infra-content">
+                            <div class="infra-subtitle">Aesthetics & Branding</div>
+                            <h3>State-of-the-Art Printing Facilities</h3>
+                            <p>We understand that packaging is the face of your brand. Our premium in-house multi-color printing machinery ensures that every bag and film we produce carries vibrant, accurate, and durable graphics. We offer comprehensive custom printing solutions with exact sizing, vivid color matching, and bespoke designs that make your product stand out on the shelf.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="infra-row">
+                        <div class="infra-image">
+                            <img src="assets/images/infrastructure/pouching.png" alt="Pouching and Slitting">
+                        </div>
+                        <div class="infra-content">
+                            <div class="infra-subtitle">Precision Finishing</div>
+                            <h3>Integrated Pouching & Cutting Units</h3>
+                            <p>Efficiency meets accuracy in our advanced cutting, pouching, and slitting department. From robust zipper slider bags to customized industrial poly bags, our automated units ensure flawless finishing and robust seals. This integrated approach allows us to maintain strict quality control while offering rapid turnaround times for bulk orders.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="infra-row reverse">
+                        <div class="infra-image">
+                            <img src="assets/images/infrastructure/quality.png" alt="Quality Control Lab">
+                        </div>
+                        <div class="infra-content">
+                            <div class="infra-subtitle">Excellence Guaranteed</div>
+                            <h3>Stringent Quality Control Lab</h3>
+                            <p>Before any product leaves our facility, it undergoes rigorous testing in our dedicated Quality Control Laboratory. As an ISO 9001:2015 & ISO 22000:2018 certified company, our expert technicians test for tensile strength, elongation, seal integrity, and dimensional accuracy to guarantee absolute perfection and compliance with international standards.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- STATS / HIGHLIGHTS -->
+        <section class="stats-banner">
+            <div class="container stats-container">
+                <div class="stat-box">
+                    <h4>45+</h4>
+                    <p>Years Experience</p>
+                </div>
+                <div class="stat-box">
+                    <h4>100%</h4>
+                    <p>In-House Production</p>
+                </div>
+                <div class="stat-box">
+                    <h4>ISO</h4>
+                    <p>Certified Facilities</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA SECTION -->
+        <section class="cta-section" style="margin-top: 0;">
+            <div class="container">
+                <div class="cta-content">
+                    <h2 class="cta-title">Experience Our Quality Firsthand</h2>
+                    <p class="cta-text">Looking for a reliable packaging partner with unmatched manufacturing capabilities? Let's discuss your requirements.</p>
+                    <div class="cta-buttons">
+                        <a href="contact.html" class="cta-btn cta-btn-primary">Get In Touch</a>
+                        <a href="product.html" class="cta-btn cta-btn-outline" style="color: white; border-color: white;">Explore Products</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Plastofilms</h3>
+                    <p>Manufacturers of Zipper Pouch & Slider Bags, Shrink Film, HM, LD, PP, Tubes & Printed bags, Biodegradable Bags, Multilayer Specialty Poly Films</p>
+                    <div class="footer-socials">
+                        <a href="https://wa.me/9313509010" target="_blank" class="social-icon" title="WhatsApp">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        </a>
+                        <a href="mailto:info@plastofilms.com" class="social-icon" title="Email">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        </a>
+                        <a href="tel:+9313509010" class="social-icon" title="Phone">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <div class="footer-links">
+                        <a href="index.html">Home</a>
+                        <a href="product.html">Our Products</a>
+                        <a href="about.html">About Us</a>
+                        <a href="infrastructure.html">Infrastructure</a>
+                        <a href="certifications.html">Our Certifications</a>
+                        <a href="contact.html">Contact Us</a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Address</h3>
+                    <p>124, DSIDC, Complex, Okhla Industrial Area, Phase – I, New Delhi 110020 <br/> <br/> 120, DSIDC, Complex, Okhla Industrial Area, Phase – I, New Delhi 110020</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Info</h3>
+                    <p><strong>Email:</strong><br> info@plastofilms.com</p>
+                    <p><strong>Phone:</strong><br> +91 1141611019</p>
+                    <p style="line-height: 1.6;"><strong>Mobile:</strong><br> 
+                    <a href="tel:+919810003874" style="color: inherit; text-decoration: none;">+91 9810003874</a><br> 
+                    <a href="tel:+919560683432" style="color: inherit; text-decoration: none;">+91 9560683432</a><br> 
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Plastofilms. All rights reserved.</p>
+                <p style="margin-top: 5px; font-size: 0.9rem; color: #94a3b8;"><strong>GSTIN:</strong> 07AAMFP1187B1ZB &nbsp;|&nbsp; <strong>MSME/UDYAM No:</strong> -DL-09-0003072</p>
+            </div>
+        </div>
+    </footer>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
