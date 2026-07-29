@@ -34,15 +34,15 @@
     </header>
 
     <main>
-        <section class="hero-scroll-container" style="height: 150vh; position: relative;">
+        <section class="hero-scroll-container" style="height: 150vh; position: relative; background-color: #000;">
             <div style="position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden;">
-                <!-- Background Video -->
-                <video autoplay loop muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+                <!-- Background Video with better browser support flags -->
+                <video id="hero-bg-video" autoplay loop muted playsinline preload="auto" style="position: absolute; top: 0; left: 0; width: 100%; height: 100vh; object-fit: cover; z-index: 0;">
                     <source src="assets/images/download.webm" type="video/webm">
                 </video>
                 
                 <!-- Text layer that fades in exactly as you scroll -->
-                <div id="hero-text-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none;">
+                <div id="hero-text-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100vh; background-color: #ffffff; z-index: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.1s ease-out;">
                     <div class="container" style="max-width: 1200px; text-align: center;">
                         <h1 class="hero-title animated-logo" style="font-family: Arial, Helvetica, sans-serif; font-size: 8rem; font-weight: 900; margin-bottom: 0; line-height: 1.1; letter-spacing: -3px;"><span style="color: #ff0000;">Plasto</span> <span style="color: #0066cc;">Films</span></h1>
                         <p class="hero-cert" style="font-family: Georgia, 'Times New Roman', Times, serif; color: #666666; text-shadow: none; font-size: 1.8rem; font-weight: normal; margin-top: 0; margin-bottom: 0.5rem;">An ISO 9001:2015 & ISO 22000:2018 Company</p>
@@ -60,7 +60,10 @@
             function updateHeroScroll() {
                 const textLayer = document.getElementById('hero-text-layer');
                 if (!textLayer) return;
-                const scrollY = window.scrollY;
+                
+                // Use multiple fallbacks for scroll position for better browser support
+                const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+                
                 // Fade in starts immediately and is fully visible after 400px of scrolling
                 let opacity = scrollY / 400;
                 if (opacity > 1) opacity = 1;
@@ -71,6 +74,7 @@
             }
             window.addEventListener('scroll', updateHeroScroll);
             window.addEventListener('DOMContentLoaded', updateHeroScroll);
+            // Ensure it runs once immediately
             updateHeroScroll();
         </script>
 
